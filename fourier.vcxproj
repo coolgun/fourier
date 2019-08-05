@@ -1,0 +1,469 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DF0D19E2-6C59-34A4-BFEC-6F81F179A7A9}</ProjectGuid>
+    <RootNamespace>QtGuiApplication1</RootNamespace>
+    <Keyword>Qt4VSv1.0</Keyword>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <PlatformToolset>v141</PlatformToolset>
+    <OutputDirectory>release\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>Application</ConfigurationType>
+    <IntermediateDirectory>release\</IntermediateDirectory>
+    <PrimaryOutput>QtGuiApplication1</PrimaryOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <PlatformToolset>v141</PlatformToolset>
+    <OutputDirectory>release\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>Application</ConfigurationType>
+    <IntermediateDirectory>release\</IntermediateDirectory>
+    <PrimaryOutput>QtGuiApplication1</PrimaryOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <PlatformToolset>v141</PlatformToolset>
+    <OutputDirectory>debug\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>Application</ConfigurationType>
+    <IntermediateDirectory>debug\</IntermediateDirectory>
+    <PrimaryOutput>QtGuiApplication1</PrimaryOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <PlatformToolset>v141</PlatformToolset>
+    <OutputDirectory>debug\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>Application</ConfigurationType>
+    <IntermediateDirectory>debug\</IntermediateDirectory>
+    <PrimaryOutput>QtGuiApplication1</PrimaryOutput>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">
+    <QtMsBuild>$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</IgnoreImportLibrary>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IgnoreImportLibrary>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IgnoreImportLibrary>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>release\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>release\</ObjectFileName>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <ProgramDataBaseFileName>
+      </ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Qt5Widgets.lib;Qt5Gui.lib;Qt5Core.lib;qtmain.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreImportLibrary>true</IgnoreImportLibrary>
+      <LinkIncremental>false</LinkIncremental>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Link>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration)</IncludePath>
+      <Define>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</Define>
+      <CompilerFlavor>msvc</CompilerFlavor>
+      <Include>./$(Configuration)/moc_predefs.h</Include>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>release\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>release\</ObjectFileName>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;NDEBUG;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <ProgramDataBaseFileName>
+      </ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Qt5Widgets.lib;Qt5Gui.lib;Qt5Core.lib;qtmain.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 publicKeyToken=%276595b64144ccf1df%27 language=%27*%27 processorArchitecture=%27*%27"  /SUBSYSTEM:WINDOWS %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreImportLibrary>true</IgnoreImportLibrary>
+      <LinkIncremental>false</LinkIncremental>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration)</IncludePath>
+      <Define>_WINDOWS;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;NDEBUG;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;%(PreprocessorDefinitions)</Define>
+      <CompilerFlavor>msvc</CompilerFlavor>
+      <Include>./$(Configuration)/moc_predefs.h</Include>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>debug\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>debug\</ObjectFileName>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Qt5Widgetsd.lib;Qt5Guid.lib;Qt5Cored.lib;qtmaind.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;C:\opensslx86\lib;C:\Utils\postgresqlx86\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreImportLibrary>true</IgnoreImportLibrary>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Link>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration)</IncludePath>
+      <Define>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</Define>
+      <CompilerFlavor>msvc</CompilerFlavor>
+      <Include>./$(Configuration)/moc_predefs.h</Include>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>debug\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>debug\</ObjectFileName>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Qt5Widgetsd.lib;Qt5Guid.lib;Qt5Cored.lib;qtmaind.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 publicKeyToken=%276595b64144ccf1df%27 language=%27*%27 processorArchitecture=%27*%27"  /SUBSYSTEM:WINDOWS %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreImportLibrary>true</IgnoreImportLibrary>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration)</IncludePath>
+      <Define>_WINDOWS;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;%(PreprocessorDefinitions)</Define>
+      <CompilerFlavor>msvc</CompilerFlavor>
+      <Include>./$(Configuration)/moc_predefs.h</Include>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\arch.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\assembler.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instapi.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blapi-nocxx.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blarray.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blarrayops.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blbitarray.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\blbmpcodec.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blcompop.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blcompoppart.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blcontext.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bldeflate.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchgradientpart.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchpart.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchpatternpart.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchpixelptrpart.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchsolidpart.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchutils.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blfilesystem.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfillpart.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\fixedpipe\blfixedpiperuntime.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blfont.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blformat.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blgeometry.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blglyphbuffer.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blgradient.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blgradient_avx2.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blgradient_sse2.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blimage.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blimagescale.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bljpegcodec.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bljpeghuffman.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bljpegops.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bljpegops_sse2.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blmath.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blmatrix.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blmatrix_avx.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blmatrix_sse2.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotcff.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotcmap.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotcore.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotface.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotglyf.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotkern.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotlayout.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotmetrics.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotname.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpath.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpathstroke.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpattern.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blpipecompiler.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpipedefs.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blpipegencore.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blpipegenruntime.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blpipepart.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpiperuntime.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelconverter.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelconverter_avx2.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelconverter_sse2.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelconverter_ssse3.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelops.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\blpngcodec.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\blpngops.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\blpngops_sse2.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blrandom.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\raster\blrastercontext.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\raster\blrasterfiller.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\raster\blrasterworker.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blregion.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blrgba.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blruntime.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blstring.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blsupport.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\bltables.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blthreading.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blthreadpool.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\bltrace.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blunicode.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blvariant.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blzeroallocator.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blzoneallocator.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blzonelist.cpp" />
+    <ClCompile Include="..\..\..\blend2d\src\blend2d\blzonetree.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\builder.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\callconv.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\codeholder.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\compiler.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\constpool.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\cpuinfo.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\emitter.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\func.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\globals.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\inst.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\jitallocator.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\jitruntime.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\logging.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\operand.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\osutils.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\ralocal.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\rapass.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\rastack.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\string.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\support.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\target.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\type.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\virtmem.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86assembler.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86builder.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86callconv.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86compiler.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86features.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instdb.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86internal.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86logging.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86operand.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86rapass.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zone.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonehash.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonelist.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonestack.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonetree.cpp" />
+    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonevector.cpp" />
+    <ClCompile Include="main.cpp">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\%(Filename).moc</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">input</DynamicSource>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\%(Filename).moc</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\%(Filename).moc</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">input</DynamicSource>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\%(Filename).moc</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="trinterp.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\boost.1.71.0.0\build\boost.targets" Condition="Exists('packages\boost.1.71.0.0\build\boost.targets')" />
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties Qt5Version_x0020_Win32="msvc2017" Qt5Version_x0020_x64="msvc2017_64" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\boost.1.71.0.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost.1.71.0.0\build\boost.targets'))" />
+  </Target>
+</Project>
