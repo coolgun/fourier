@@ -1,0 +1,6 @@
+[submodule "Blend2d"]
+	path = Blend2d
+	url = https://github.com/blend2d/blend2d.git
+[submodule "AsmJit"]
+	path = AsmJit
+	url = https://github.com/asmjit/asmjit.git
