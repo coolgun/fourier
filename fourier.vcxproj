@@ -142,7 +142,7 @@
       <QTDIR>$(QTDIR)</QTDIR>
       <InputFile>%(FullPath)</InputFile>
       <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration)</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</IncludePath>
       <Define>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</Define>
       <CompilerFlavor>msvc</CompilerFlavor>
       <Include>./$(Configuration)/moc_predefs.h</Include>
@@ -152,7 +152,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;C:\Proj\blend2d\blend2d\src;C:\Proj\blend2d\blend2d\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>release\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -197,7 +197,7 @@
       <QTDIR>$(QTDIR)</QTDIR>
       <InputFile>%(FullPath)</InputFile>
       <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration)</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;C:\Proj\blend2d\blend2d\src;C:\Proj\blend2d\blend2d\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\release;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</IncludePath>
       <Define>_WINDOWS;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;NDEBUG;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;%(PreprocessorDefinitions)</Define>
       <CompilerFlavor>msvc</CompilerFlavor>
       <Include>./$(Configuration)/moc_predefs.h</Include>
@@ -248,7 +248,7 @@
       <QTDIR>$(QTDIR)</QTDIR>
       <InputFile>%(FullPath)</InputFile>
       <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration)</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</IncludePath>
       <Define>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</Define>
       <CompilerFlavor>msvc</CompilerFlavor>
       <Include>./$(Configuration)/moc_predefs.h</Include>
@@ -258,14 +258,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;C:\Proj\blend2d\blend2d\src;C:\Proj\blend2d\blend2d\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>debug\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <ObjectFileName>debug\</ObjectFileName>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
@@ -300,7 +299,7 @@
       <QTDIR>$(QTDIR)</QTDIR>
       <InputFile>%(FullPath)</InputFile>
       <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\..\blend2d\src;.\..\..\..\blend2d\3rdparty\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration)</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;C:\Proj\blend2d\blend2d\src;C:\Proj\blend2d\blend2d\asmjit\src;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;.\debug;\include;$(QTDIR)\mkspecs\win32-msvc;$(Configuration);%(AdditionalIncludeDirectories)</IncludePath>
       <Define>_WINDOWS;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;%(PreprocessorDefinitions)</Define>
       <CompilerFlavor>msvc</CompilerFlavor>
       <Include>./$(Configuration)/moc_predefs.h</Include>
@@ -309,128 +308,123 @@
     </QtMoc>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\arch.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\assembler.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instapi.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blapi-nocxx.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blarray.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blarrayops.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blbitarray.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\blbmpcodec.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blcompop.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blcompoppart.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blcontext.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bldeflate.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchgradientpart.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchpart.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchpatternpart.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchpixelptrpart.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchsolidpart.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfetchutils.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blfilesystem.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blfillpart.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\fixedpipe\blfixedpiperuntime.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blfont.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blformat.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blgeometry.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blglyphbuffer.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blgradient.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blgradient_avx2.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blgradient_sse2.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blimage.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blimagescale.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bljpegcodec.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bljpeghuffman.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bljpegops.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\bljpegops_sse2.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blmath.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blmatrix.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blmatrix_avx.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blmatrix_sse2.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotcff.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotcmap.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotcore.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotface.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotglyf.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotkern.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotlayout.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotmetrics.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\opentype\blotname.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpath.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpathstroke.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpattern.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blpipecompiler.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpipedefs.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blpipegencore.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blpipegenruntime.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\pipegen\blpipepart.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpiperuntime.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelconverter.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelconverter_avx2.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelconverter_sse2.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelconverter_ssse3.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blpixelops.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\blpngcodec.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\blpngops.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\codec\blpngops_sse2.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blrandom.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\raster\blrastercontext.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\raster\blrasterfiller.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\raster\blrasterworker.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blregion.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blrgba.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blruntime.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blstring.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blsupport.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\bltables.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blthreading.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blthreadpool.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\bltrace.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blunicode.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blvariant.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blzeroallocator.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blzoneallocator.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blzonelist.cpp" />
-    <ClCompile Include="..\..\..\blend2d\src\blend2d\blzonetree.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\builder.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\callconv.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\codeholder.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\compiler.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\constpool.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\cpuinfo.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\emitter.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\func.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\globals.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\inst.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\jitallocator.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\jitruntime.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\logging.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\operand.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\osutils.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\ralocal.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\rapass.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\rastack.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\string.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\support.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\target.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\type.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\virtmem.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86assembler.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86builder.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86callconv.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86compiler.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86features.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instdb.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86internal.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86logging.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86operand.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\x86\x86rapass.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zone.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonehash.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonelist.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonestack.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonetree.cpp" />
-    <ClCompile Include="..\..\..\blend2d\3rdparty\asmjit\src\asmjit\core\zonevector.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\arch.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\assembler.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\builder.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\callconv.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\codeholder.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\compiler.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\constpool.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\cpuinfo.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\emitter.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\func.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\globals.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\inst.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\jitallocator.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\jitruntime.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\logging.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\operand.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\osutils.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\ralocal.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\rapass.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\rastack.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\string.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\support.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\target.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\type.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\virtmem.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\zone.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\zonehash.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\zonelist.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\zonestack.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\zonetree.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\core\zonevector.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86assembler.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86builder.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86callconv.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86compiler.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86features.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86instapi.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86instdb.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86internal.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86logging.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86operand.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\asmjit\src\asmjit\x86\x86rapass.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\api-nocxx.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\array.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\arrayops.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\bitarray.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\bitops.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\codec\bmpcodec.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\codec\deflate.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\codec\jpegcodec.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\codec\jpeghuffman.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\codec\jpegops.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\codec\pngcodec.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\codec\pngops.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\compop.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\context.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\filesystem.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\fixedpipe\fixedpiperuntime.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\font.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\fontmanager.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\format.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\geometry.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\glyphbuffer.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\gradient.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\image.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\imagecodec.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\imagescale.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\math.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\matrix.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otcff.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otcmap.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otcore.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otface.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otglyf.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otkern.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otlayout.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otmetrics.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\opentype\otname.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\path.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pathstroke.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pattern.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipedefs.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\compoppart.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\fetchgradientpart.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\fetchpart.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\fetchpatternpart.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\fetchpixelptrpart.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\fetchsolidpart.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\fetchutils.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\fillpart.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\pipecompiler.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\pipegencore.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\pipegenruntime.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pipegen\pipepart.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\piperuntime.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pixelconverter.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\pixelops.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\random.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\raster\rastercontext.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\raster\rasterfiller.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\raster\rasterworkercontext.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\raster\rasterworkermanager.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\region.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\rgba.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\runtime.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\scopedallocator.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\string1.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\tables.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\threading\thread.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\threading\threadpool.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\trace.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\unicode.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\variant.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\zeroallocator.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\zoneallocator.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\zonehash1.cpp" />
+    <ClCompile Include="..\blend2d\blend2d\src\blend2d\zonelist1.cpp" />
     <ClCompile Include="main.cpp">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\%(Filename).moc</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">input</DynamicSource>
@@ -445,9 +439,6 @@
   <ItemGroup>
     <ClInclude Include="trinterp.hpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />
@@ -460,10 +451,4 @@
       <UserProperties Qt5Version_x0020_Win32="msvc2017" Qt5Version_x0020_x64="msvc2017_64" />
     </VisualStudio>
   </ProjectExtensions>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\boost.1.71.0.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost.1.71.0.0\build\boost.targets'))" />
-  </Target>
 </Project>

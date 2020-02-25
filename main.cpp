@@ -10,7 +10,6 @@
 double nChoosek(unsigned n, unsigned k)
 {
 	if (k > n) return 0;
-	if (k * 2 > n) k = n - k;
 	if (k == 0) return 1;
 
 	int result = n;
@@ -62,15 +61,17 @@ BLPoint lagrange( const QList<std::complex<double>> &lst, double t)
 }
 */
 
+using namespace std::complex_literals;
+
 namespace fourtd
 {
-	template<> complex_double fourier::make_complex<const BLPoint&>(const BLPoint &c)
+	template<> inline complex_double fourier::make_complex<BLPoint>(const BLPoint &c)
 	{
 		return { c.x,c.y };
 	}
 
 	
-	template<> BLPoint fourier::make_value<BLPoint>(const complex_double &z)
+	template<> inline BLPoint fourier::make_value<BLPoint>(const complex_double &z)
 	{
 		return { z.real(), z.imag() };
 	}
@@ -111,16 +112,17 @@ const QList<BLPoint> pi_symbol =
 };
 
 
-
+constexpr double  sel_tolerance = 7 * 7;
 
 class QCanvasWidget : public QWidget
 {
-
+	
 	BLImage blImage;
 	QImage substr;
 	QList<BLPoint> pts  = pi_symbol;
 	fourier f;
 	QList<BLPoint>::iterator	cur_point = pts.end();
+	std::vector<BLPoint> interp;
 	bool is_close = true;
 	bool show_circles{};
 	bool show_broken_line{};
@@ -166,10 +168,15 @@ class QCanvasWidget : public QWidget
 
 	void update_coeff()
 	{
+		interp.clear();
+
 		if (pts.size() > 1)
 		{
 			f.calcul_coeff(pts.cbegin(), pts.cend());
 		}
+
+		parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(f.square()).arg(f.length(0,2* fourtd::pi)));
+		
 	}
 
 	void paintEvent(QPaintEvent*) override
@@ -186,17 +193,17 @@ class QCanvasWidget : public QWidget
 			[&test_pt](auto &pt)
 		{
 			const auto d = pt - test_pt;
-			return (d.x*d.x + d.y*d.y) < 49.0;
+			return (d.x*d.x + d.y*d.y) < sel_tolerance;
 		}
 		);
 
 	}
 
+	
 
 	void mouseDoubleClickEvent(QMouseEvent* event) override
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
-		const auto test = find_point(pt);
+		const auto test = find_point(BLPoint(event->pos().x(), event->pos().y()));
 
 		if (test != pts.end())
 		{
@@ -214,24 +221,35 @@ class QCanvasWidget : public QWidget
 	{
 		const BLPoint pt(event->pos().x(), event->pos().y());
 
+		
+		if (event->modifiers() & Qt::ControlModifier)
+		{
+				
+			if (f.containsPoint(pt))
+			{
+				QMessageBox::information(this, QString("Point inside"), {});
+			}
+			return;
+		}
+
 		cur_point = find_point(pt);
 
 		if (cur_point == pts.end())
 		{
-			int cnt = 0;
+			int cnt{};
 			const auto inter = f.lengthToPoint({ pt.x,pt.y },cnt);
-			//QMessageBox::information(this, QString::number(cnt), {});
-
+			
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
 				pts.insert(index, pt);
-				cur_point = pts.begin() + index;
+				std::advance(cur_point = pts.begin(), index);
 			}
+
 			else
 			{
 				pts.push_back(pt);
-				cur_point = pts.begin() + (pts.size() - 1);
+				std::advance(cur_point = pts.begin(), pts.size() - 1);
 			}
 
 		}
@@ -269,8 +287,11 @@ class QCanvasWidget : public QWidget
 
 		if (pts.size() > 1)
 		{
+			if (interp.empty())
+				interp = f.values<BLPoint>(0, pts.size() - 1 + static_cast<int>(is_close), 0.01);
+
 			ctx.setStrokeStyle(BLRgba32(0x800000FFu));
-			std::vector<BLPoint> interp=f.values<BLPoint>(0, pts.size() - 1 + static_cast<int>(is_close), 0.01);
+			
 			ctx.setStrokeWidth(4);
 			if (is_close)
 				ctx.strokePolygon(&interp[0], interp.size());
@@ -292,25 +313,25 @@ class QCanvasWidget : public QWidget
 						lines.emplace_back(gsum.real(), gsum.imag());
 
 					auto sum = gsum;
+					const auto co = std::conj(sincos);
 					const auto r1 = (c.first.real() + c.second.imag()) / 2.0;
 					const auto r2 = (c.first.imag() - c.second.real()) / 2.0;
-					const auto z1= r1* sincos;
-					const auto z2 = sincos * complex_double(0,1)*r2;
-
+					const auto r3 = (c.first.real() - c.second.imag()) / 2.0;
+					const auto r4 = (c.first.imag() + c.second.real()) / 2.0;
+					const auto z1 = r1 * sincos;
+					const auto z2 = sincos * 1i*r2;// mul i 
+					const auto z3 = r3 * co;
+					const auto z4 = r4 * co * 1i;// mul i 
 
 					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::sqrt(r1*r1 + r2 * r2)));
 					sum += z1 + z2;
 					lines.emplace_back(sum.real(), sum.imag());
 					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
-
-					const auto r3 = (c.first.real() - c.second.imag()) / 2.0;
-					const auto r4 = (c.first.imag() + c.second.real()) / 2.0;
-					const auto z3 =r3* std::conj(sincos);
-					const auto z4 = r4 * std::conj(sincos)*complex_double(0, 1);
 					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::sqrt(r3*r3 + r4 * r4)));
 					sum += z3 + z4;
 					lines.emplace_back(sum.real(), sum.imag());
 					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+
 					fourier::derivative_step(der, c, sincos, k);
 
 				}
@@ -367,6 +388,7 @@ public:
 	void clear()
 	{
 		pts.clear();
+		cur_point = pts.end();
 		update_coeff();
 		updateCanvas();
 	}
@@ -374,6 +396,7 @@ public:
 	void setPi()
 	{
 		pts = pi_symbol;
+		cur_point = pts.begin();
 		update_coeff();
 		updateCanvas();
 	}
@@ -412,6 +435,7 @@ public:
 
 	void setIsClose(bool value)
 	{
+		interp.clear();
 		is_close = value;
 		updateCanvas();
 	}
@@ -422,6 +446,8 @@ public:
 
 
 	}
+
+	int i = 0;
 
 
 };
