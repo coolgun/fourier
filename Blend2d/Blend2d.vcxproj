@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\api-nocxx.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\array.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\arrayops.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\bitarray.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\bitops.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\bmpcodec.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\deflate.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\jpegcodec.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\jpeghuffman.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\jpegops.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\jpegops_sse2.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\pngcodec.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\pngops.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\pngops_sse2.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\compop.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\context.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\filesystem.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\fixedpipe\fixedpiperuntime.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\font.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\fontmanager.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\format.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\geometry.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\glyphbuffer.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\gradient.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\gradient_avx2.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\gradient_sse2.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\image.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\imagecodec.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\imagescale.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\math.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\matrix.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\matrix_avx.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\matrix_sse2.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otcff.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otcmap.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otcore.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otface.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otglyf.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otkern.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otlayout.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otmetrics.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otname.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\path.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pathstroke.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pattern.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipedefs.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\compoppart.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchgradientpart.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchpart.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchpatternpart.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchpixelptrpart.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchsolidpart.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchutils.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fillpart.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\pipecompiler.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\pipegencore.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\pipegenruntime.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\pipepart.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\piperuntime.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pixelconverter.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pixelops.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\random.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rastercontext.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterfiller.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkercontext.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkermanager.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\region.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\rgba.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\runtime.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\scopedallocator.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\string.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\support.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\tables.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\thread.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\threadpool.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\trace.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\unicode.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\variant.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zeroallocator.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zoneallocator.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zonehash.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zonelist.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zonetree.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{C21495B1-3E85-4F1C-8E47-AE0BCA76411A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Blend2d</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;ASMJIT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>C:\Proj\blend2d\blend2d\3rdparty\asmjit\src;C:\Proj\blend2d\blend2d\src</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>..\blend2dd.lib</OutputFile>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;ASMJIT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>C:\Proj\blend2d\blend2d\3rdparty\asmjit\src;C:\Proj\blend2d\blend2d\src</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>..\blend2d.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

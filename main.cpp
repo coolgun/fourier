@@ -170,10 +170,7 @@ class QCanvasWidget : public QWidget
 	{
 		interp.clear();
 
-		if (pts.size() > 1)
-		{
-			f.calcul_coeff(pts.cbegin(), pts.cend());
-		}
+		f.calcul_coeff(pts.cbegin(), pts.cend());
 
 		parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(f.square()).arg(f.length(0,2* fourtd::pi)));
 		
@@ -275,7 +272,7 @@ class QCanvasWidget : public QWidget
 
 
 
-	void onRenderB2D(BLContext& ctx) noexcept
+	void onRenderB2D(BLContext& ctx) 
 	{
 
 		ctx.setFillStyle(BLRgba32(0xFF000000u));

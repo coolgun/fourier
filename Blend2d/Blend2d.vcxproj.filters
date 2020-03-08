@@ -1,0 +1,286 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\codec">
+      <UniqueIdentifier>{bcc17669-e212-4541-839b-bc5fe4647a60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\fixedpipe">
+      <UniqueIdentifier>{31630a7b-e7f4-4f3f-bd78-96e0cc14341e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\opentype">
+      <UniqueIdentifier>{9a1ddee7-79a4-48e3-ad05-145050668ea9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pipegen">
+      <UniqueIdentifier>{2ce76c04-c53e-429f-a6c9-accaf997ecc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\raster">
+      <UniqueIdentifier>{e3ea8ee9-2a5d-4776-b162-7813d0edb9ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\threading">
+      <UniqueIdentifier>{fd7a7e65-6f75-4d8f-bc18-4e0916bf4284}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\bmpcodec.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\deflate.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\jpegcodec.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\jpeghuffman.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\jpegops.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\jpegops_sse2.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\pngcodec.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\pngops.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\codec\pngops_sse2.cpp">
+      <Filter>Source Files\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\fixedpipe\fixedpiperuntime.cpp">
+      <Filter>Source Files\fixedpipe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\compoppart.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchgradientpart.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchpart.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchpatternpart.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchpixelptrpart.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchsolidpart.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fetchutils.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\fillpart.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\pipecompiler.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\pipegencore.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\pipegenruntime.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipegen\pipepart.cpp">
+      <Filter>Source Files\pipegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rastercontext.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterfiller.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkercontext.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkermanager.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otcff.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otcmap.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otcore.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otface.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otglyf.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otkern.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otlayout.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otmetrics.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\opentype\otname.cpp">
+      <Filter>Source Files\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\thread.cpp">
+      <Filter>Source Files\threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\threadpool.cpp">
+      <Filter>Source Files\threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\api-nocxx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\array.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\arrayops.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\bitarray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\bitops.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\compop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\context.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\filesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\fontmanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\format.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\glyphbuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\gradient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\gradient_avx2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\gradient_sse2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\imagecodec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\imagescale.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\math.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\matrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\matrix_avx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\matrix_sse2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\path.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pathstroke.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pattern.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pipedefs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\piperuntime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pixelconverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pixelops.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\random.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\region.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\rgba.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\runtime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\scopedallocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\string.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\support.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\trace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\unicode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\variant.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zeroallocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zoneallocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zonehash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zonelist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zonetree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

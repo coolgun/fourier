@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{24bd6be7-6732-4144-80af-095739b28e77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\x86">
+      <UniqueIdentifier>{9a74f8fc-5d60-4cd4-953f-59b35c9731bb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\arch.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\assembler.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\builder.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\callconv.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\codeholder.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\compiler.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\constpool.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\cpuinfo.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\emitter.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\func.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\globals.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\inst.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\jitallocator.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\jitruntime.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\logging.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\operand.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\osutils.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\ralocal.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\rapass.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\rastack.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\string.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\support.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\target.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\type.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\virtmem.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zone.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonehash.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonelist.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonestack.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonetree.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonevector.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86assembler.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86builder.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86callconv.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86compiler.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86features.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instapi.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instdb.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86internal.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86logging.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86operand.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86rapass.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

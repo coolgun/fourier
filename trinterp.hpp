@@ -190,6 +190,50 @@ namespace fourtd
 		template<class C> static complex_double make_complex(const C&c);
 		template<class C> static C make_value(const complex_double& z);
 
+
+		double simpson(double a, double b, size_t n)  const
+		{
+
+			const double delta = (b - a) / n;
+			double f1 = 0.0, f2 = 0.0;
+
+			TrigonometricIterator it(delta, a);
+			
+			const double fs = std::abs(derivative_value(*it));
+
+			for (double t = a+ delta; t < b; )
+			{
+				f1 += std::abs(derivative_value(*it));
+				t += delta; ++it;
+				f2 += std::abs(derivative_value(*it));
+				t += delta; ++it;
+			}
+			
+			return delta / 3 * (fs + 4 * f1 + 2 * f2);
+		}
+
+		double length(double a, double b, double eps = 0.1) const
+		{
+			if (ab.empty()) return 0.0;
+			a = indexToAngle(a);
+			b = indexToAngle(b);
+			
+			size_t n = 2; 
+
+			double first  = simpson(a, b, n); 
+			double second{};
+
+			do 
+			{
+				second = first;
+				n*=2;  
+				first = simpson(a, b, n);
+			} 
+			while (std::abs(first - second) > eps);
+			return first;
+		}
+
+
 		double square()const
 		{
 			if (square_value<0.0)
@@ -221,13 +265,14 @@ namespace fourtd
 		template<class _FwdIt>
 		void calcul_coeff(_FwdIt _First, _FwdIt _Last)
 		{
+			ab.clear();
 			square_value = -1.0; //reset;
 			if (_First == _Last) return;
 			
 			size = std::distance(_First,_Last);
 			is_odd = size % 2 != 0;
 
-			ab.clear();
+			
 			a0 = {};
 			complex_double bn;
 			
@@ -298,22 +343,6 @@ namespace fourtd
 			}
 		}
 
-		double length(double a, double b, double delta = 0.01) const
-		{
-			double ret{};
-
-			values_impl
-			(
-				[&ret,delta](const complex_double &v) {ret+=std::abs(v); }
-				,[this](const complex_double &start_sincos) {return this->derivative_value(start_sincos); }
-				, a
-				, b
-				, delta
-				);
-			
-			return ret *delta;
-
-		}
 
 		template<typename C> std::vector<C> values(double a, double b, double delta = 0.01) const
 		{
