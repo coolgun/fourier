@@ -5,11 +5,41 @@
 #include <complex>
 #include <algorithm>
 #include <execution>
+#include <future>
 
 namespace fourtd
 {
 	inline constexpr double pi = 3.1415926535897932385;
 	using  complex_double = std::complex<double>;
+
+	inline constexpr int MT_MIN_SIZE = 10'000;
+
+	template <typename InputIt, typename T, typename Op>
+	auto parallel_accumulate(InputIt first, InputIt last, T init, Op op)
+	{
+		const auto size = std::distance(first, last);
+		
+		if(size< MT_MIN_SIZE)
+			return std::accumulate(first, last, T{}, op);
+
+		const auto parts = std::thread::hardware_concurrency();
+
+		std::vector<std::future<T>> futures;
+		futures.reserve(parts);
+		
+		for (std::size_t i = 0; i != parts; ++i) 
+		{
+			const auto part_size = (size * i + size) / parts - (size * i) / parts;
+			futures.emplace_back(std::async(std::launch::async,
+				[=] {
+					return std::accumulate(first, std::next(first, part_size), T{}, op); 
+				}));
+			std::advance(first, part_size);
+		}
+
+		
+		return std::accumulate(std::begin(futures), std::end(futures), init,[](const T prev, auto& future) { return prev + future.get(); });
+	}
 
 	class fourier
 	{
@@ -20,15 +50,14 @@ namespace fourtd
 		}
 
 
-		struct TrigonometricIterator
+		struct TrigonometricIterator 
 		{
 
 			const complex_double start_sincos;
 			complex_double cur_sincos;
 
 
-
-			TrigonometricIterator(const complex_double &start_sincos, double start_angle = 0.0) :
+			explicit TrigonometricIterator(const complex_double &start_sincos, double start_angle = 0.0) noexcept :
 				start_sincos(start_sincos),
 				cur_sincos(make_sincos(start_angle))
 
@@ -36,7 +65,7 @@ namespace fourtd
 				step();
 			}
 
-			TrigonometricIterator(double delta_angle, double start_angle = 0.0) :
+			explicit TrigonometricIterator(double delta_angle, double start_angle = 0.0) noexcept :
 				start_sincos(make_sincos(delta_angle)),
 				cur_sincos(make_sincos(start_angle))
 			{
@@ -44,28 +73,33 @@ namespace fourtd
 			}
 
 
-			complex_double sincos() const
+			complex_double sincos() const noexcept
 			{
 				return cur_sincos;
 			}
 
-			double cos() const
+			double cos() const noexcept
 			{
 				return cur_sincos.real();
 			}
 
-			double sin() const
+			double sin() const noexcept
 			{
 				return cur_sincos.imag();
 			}
 
-			complex_double operator*() const
+			const complex_double &operator*() const noexcept
 			{
-				return sincos();
+				return cur_sincos;
+			}
+
+			const complex_double *operator->() const noexcept
+			{
+				return &cur_sincos;
 			}
 
 
-			void step()
+			void step() noexcept 
 			{
 				cur_sincos =
 				{
@@ -76,13 +110,20 @@ namespace fourtd
 			}
 
 
-			TrigonometricIterator& operator++()
+			TrigonometricIterator& operator++() noexcept
 			{
 				step();
 				return *this;
 			}
 
-			TrigonometricIterator& operator+=(size_t step_count)
+			TrigonometricIterator operator++(int) noexcept
+			{
+				TrigonometricIterator it(*this);
+				step();
+				return it;
+			}
+
+			TrigonometricIterator& operator+=(size_t step_count)noexcept
 			{
 				for (size_t i = 0; i < step_count; ++i)
 					step();
@@ -151,7 +192,7 @@ namespace fourtd
 					++l;
 				}
 
-				const auto val = nativ_value(c);
+				const auto val = single_nativ_value(c);
 				std::get<0>(el) = std::abs(val - p0);
 				std::get<1>(el) = c;
 			}
@@ -160,7 +201,7 @@ namespace fourtd
 			const auto max_el = std::min_element(ranges.cbegin(), ranges.cend());
 
 			const auto t = std::get<1>(*max_el);
-			const auto val = nativ_value(t);
+			const auto val = single_nativ_value(t);
 			cnt = call_fun_cnt;
 
 			return { t,val,std::abs(val - p0) };
@@ -180,6 +221,8 @@ namespace fourtd
 		fourier() = delete;
 		fourier(const fourier&) = delete;
 		fourier(fourier&&) = delete;
+		fourier& operator =(const fourier&) = delete;
+
 
 		template<class _FwdIt>
 		explicit fourier(_FwdIt _First, _FwdIt _Last)
@@ -187,38 +230,59 @@ namespace fourtd
 			calcul_coeff(_First, _Last);
 		}
 
-		template<class C> static complex_double make_complex(const C&c);
+		template<class C> static complex_double make_complex(C&&c);
 		template<class C> static C make_value(const complex_double& z);
 
 
-		double simpson(double a, double b, size_t n)  const
+		double simpson(double a, double b, size_t size)  const
 		{
 
-			const double delta = (b - a) / n;
-			double f1 = 0.0, f2 = 0.0;
 
-			TrigonometricIterator it(delta, a);
-			
-			const double fs = std::abs(derivative_value(*it));
+			const double delta = (b - a) / size;
+			const auto parts = 1;// std::thread::hardware_concurrency();
+			const double d2 = (b - a) / parts;
 
-			for (double t = a+ delta; t < b; )
+			std::vector<std::future<double>> futures;
+			futures.reserve(parts);
+
+			for (std::size_t i = 0; i != parts; ++i)
 			{
-				f1 += std::abs(derivative_value(*it));
-				t += delta; ++it;
-				f2 += std::abs(derivative_value(*it));
-				t += delta; ++it;
+				auto al = a + i * d2;
+				auto bl = a + (i+1) * d2;
+
+				futures.emplace_back(std::async(std::launch::async,
+					[this, al , bl, delta]
+				{
+					double f1 = 0.0, f2 = 0.0;
+					TrigonometricIterator it(delta, al);
+					const double fs = std::abs(derivative_value(*it));
+					++it;
+
+					for (double t = al + delta; t < bl; )
+					{
+						f1 += std::abs(derivative_value(*it));
+						t += delta; ++it;
+						f2 += std::abs(derivative_value(*it));
+						t += delta; ++it;
+					}
+
+					return delta / 3 * (fs + 4 * f1 + 2 * f2);
+				})
+				);
 			}
-			
-			return delta / 3 * (fs + 4 * f1 + 2 * f2);
+
+
+			return std::accumulate(futures.begin(), futures.end(), 0.0, [](const auto prev, auto& future) { return prev + future.get(); });
 		}
 
 		double length(double a, double b, double eps = 0.1) const
 		{
-			if (ab.empty()) return 0.0;
+			
+			if (ab.empty()) return {};
 			a = indexToAngle(a);
 			b = indexToAngle(b);
 			
-			size_t n = 2; 
+			size_t n = 20; 
 
 			double first  = simpson(a, b, n); 
 			double second{};
@@ -238,13 +302,16 @@ namespace fourtd
 		{
 			if (square_value<0.0)
 			{
-				square_value = 0.0;
-				
-				for (const auto &c : ab)
-				{
-					square_value += c.first.real()*c.second.imag()-c.first.imag()*c.second.real();
-				}
-				square_value = pi*std::abs(square_value);
+				square_value = pi * std::abs(std::accumulate
+				(
+					ab.cbegin()
+					, ab.cend()
+					, 0.0
+					, [](double square_value, const TrCoeff &c)
+					{
+						return square_value + c.first.real()*c.second.imag() - c.first.imag()*c.second.real();
+					})
+				);
 			}
 			
 			return square_value;
@@ -271,7 +338,6 @@ namespace fourtd
 			
 			size = std::distance(_First,_Last);
 			is_odd = size % 2 != 0;
-
 			
 			a0 = {};
 			complex_double bn;
@@ -344,25 +410,23 @@ namespace fourtd
 		}
 
 
-		template<typename C> std::vector<C> values(double a, double b, double delta = 0.01) const
+		template<typename C, typename OutIt> void values(OutIt it,double a, double b, double delta = 0.01) const
 		{
-			std::vector<C> ret_vec;
-			
+
 			values_impl
 			(
-				[&ret_vec](const complex_double &v) {ret_vec.emplace_back(make_value<C>(v)); }
-				, [this](const complex_double &start_sincos) {return this->nativ_value(start_sincos);}
+				[&it](const complex_double &v){*it=make_value<C>(v);++it;}
+				,std::bind(&fourier::single_nativ_value,this, std::placeholders::_1)
 				,a
 				,b
 				,delta
 			);
-			return ret_vec;
 		}
 
 
 		complex_double value(double idx) const
 		{
-			return nativ_value(indexToAngle(idx));
+			return single_nativ_value(indexToAngle(idx));
 		}
 
 
@@ -377,8 +441,8 @@ namespace fourtd
 		}
 
 
-		template <typename ... Funs>
-		complex_double forEach(const complex_double &start, const complex_double &start_sincos, Funs&&... funs) const
+		template <typename MainFun, typename ... Funs>
+		complex_double forEach(const complex_double &start, const complex_double &start_sincos, MainFun &&main_fun,Funs &&... funs) const
 		{
 			auto  sum = start;
 
@@ -387,6 +451,7 @@ namespace fourtd
 			for (const auto &c : ab)
 			{
 				((funs(sum, c, *it, k)), ...);
+				main_fun(sum, c, *it, k);
 				++it;
 				++k;
 			}
@@ -398,19 +463,25 @@ namespace fourtd
 		template <typename ... Funs>
 		complex_double derivative_value(const complex_double &start_sincos, Funs&&... funs) const
 		{
-			return forEach({}, start_sincos, std::forward<Funs>(funs)..., &fourier::derivative_step);
+			return forEach({}, start_sincos, &fourier::derivative_step, std::decay_t<Funs>(std::forward<Funs>(funs))...);
 		}
+
 	
 		template <typename ... Funs>
 		complex_double nativ_value(const complex_double &start_sincos,Funs&&... funs) const
 		{
-			return forEach(a0, start_sincos, std::forward<Funs>(funs)..., &fourier::fun_step);
+			return forEach(a0, start_sincos, &fourier::fun_step, std::decay_t<Funs>(std::forward<Funs>(funs))...);
+		}
+
+		complex_double single_nativ_value(const complex_double &start_sincos) const
+		{
+			return nativ_value(start_sincos);
 		}
 
 		template <typename ... Funs>
 		complex_double nativ_value(double angle,Funs&&... funs) const
 		{
-			return nativ_value<Funs...>(make_sincos(angle), std::forward<Funs>(funs)...);
+			return nativ_value<Funs...>(make_sincos(angle),std::decay_t<Funs>(std::forward<Funs>(funs))...);
 		}
 
 

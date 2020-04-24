@@ -63,15 +63,17 @@ BLPoint lagrange( const QList<std::complex<double>> &lst, double t)
 
 using namespace std::complex_literals;
 
+
 namespace fourtd
 {
-	template<> inline complex_double fourier::make_complex<BLPoint>(const BLPoint &c)
+	
+	template<> inline  complex_double fourier::make_complex<const BLPoint&>[[nodiscard]](const BLPoint &c)
 	{
 		return { c.x,c.y };
 	}
 
 	
-	template<> inline BLPoint fourier::make_value<BLPoint>(const complex_double &z)
+	template<> inline BLPoint fourier::make_value<BLPoint>[[nodiscard]](const complex_double &z)
 	{
 		return { z.real(), z.imag() };
 	}
@@ -285,7 +287,7 @@ class QCanvasWidget : public QWidget
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
-				interp = f.values<BLPoint>(0, pts.size() - 1 + static_cast<int>(is_close), 0.01);
+					f.values<BLPoint>(std::back_inserter(interp),0, pts.size() - 1 + static_cast<int>(is_close), 0.01);
 
 			ctx.setStrokeStyle(BLRgba32(0x800000FFu));
 			

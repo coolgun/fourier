@@ -81,10 +81,14 @@
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pixelconverter.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\pixelops.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\random.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\analyticrasterizer.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rastercontext.cpp" />
-    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterfiller.cpp" />
-    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkercontext.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rastercontextops.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterfetchdata.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkdata.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkermanager.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkproc.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworksynchronization.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\region.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\rgba.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\runtime.cpp" />
