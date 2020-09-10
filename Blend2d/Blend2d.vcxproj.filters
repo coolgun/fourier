@@ -294,5 +294,11 @@
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworksynchronization.cpp">
       <Filter>Source Files\raster</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\style.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\uniqueidgenerator.cpp">
+      <Filter>Source Files\threading</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

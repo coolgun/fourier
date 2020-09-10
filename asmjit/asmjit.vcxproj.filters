@@ -48,6 +48,18 @@
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\emitter.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\emitterutils.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\environment.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\errorhandler.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\formatter.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\func.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
@@ -63,7 +75,7 @@
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\jitruntime.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\logging.cpp">
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\logger.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\operand.cpp">
@@ -114,6 +126,9 @@
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonevector.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86archdata.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86assembler.cpp">
       <Filter>Source Files\x86</Filter>
     </ClCompile>
@@ -129,6 +144,9 @@
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86features.cpp">
       <Filter>Source Files\x86</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86formatter.cpp">
+      <Filter>Source Files\x86</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instapi.cpp">
       <Filter>Source Files\x86</Filter>
     </ClCompile>
@@ -136,9 +154,6 @@
       <Filter>Source Files\x86</Filter>
     </ClCompile>
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86internal.cpp">
-      <Filter>Source Files\x86</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86logging.cpp">
       <Filter>Source Files\x86</Filter>
     </ClCompile>
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86operand.cpp">

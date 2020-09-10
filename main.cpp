@@ -125,18 +125,21 @@ class QCanvasWidget : public QWidget
 	fourier f;
 	QList<BLPoint>::iterator	cur_point = pts.end();
 	std::vector<BLPoint> interp;
+	std::vector<std::tuple<double, double, double, double, double, double>> rad;
 	bool is_close = true;
 	bool show_circles{};
 	bool show_broken_line{};
 	bool show_tangent{};
 	bool show_normal{};
+	BLContextCreateInfo createInfo{};
 
 	double pos{};
 
 	void renderCanvas()
 	{
-		BLContext ctx(blImage);
+		BLContext ctx(blImage, createInfo);
 		onRenderB2D(ctx);
+		ctx.end();
 	}
 
 	void updateCanvas(bool force = false)
@@ -171,8 +174,20 @@ class QCanvasWidget : public QWidget
 	void update_coeff()
 	{
 		interp.clear();
+		rad.clear();
 
 		f.calcul_coeff(pts.cbegin(), pts.cend());
+
+		for (const auto &c : f.coeffs())
+		{
+			const auto r1 = (c.first.real() + c.second.imag()) / 2.0;
+			const auto r2 = (c.first.imag() - c.second.real()) / 2.0;
+			const auto r3 = (c.first.real() - c.second.imag()) / 2.0;
+			const auto r4 = (c.first.imag() + c.second.real()) / 2.0;
+			rad.push_back({r1,r2,r3,r4,std::sqrt(r1*r1 + r2 * r2),std::sqrt(r3*r3 + r4 * r4)});
+		}
+
+
 
 		parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(f.square()).arg(f.length(0,2* fourtd::pi)));
 		
@@ -186,14 +201,14 @@ class QCanvasWidget : public QWidget
 		painter.drawImage(QPoint{ 0, 0 }, substr);
 	}
 
-	QList<BLPoint>::iterator  find_point(const BLPoint &test_pt)
+	auto find_point(const BLPoint &test_pt)
 	{
 		return std::find_if(pts.begin(), pts.end(),
 			[&test_pt](auto &pt)
-		{
-			const auto d = pt - test_pt;
-			return (d.x*d.x + d.y*d.y) < sel_tolerance;
-		}
+			{
+				const auto d = pt - test_pt;
+				return (d.x*d.x + d.y*d.y) < sel_tolerance;
+			}
 		);
 
 	}
@@ -235,20 +250,20 @@ class QCanvasWidget : public QWidget
 
 		if (cur_point == pts.end())
 		{
-			int cnt{};
-			const auto inter = f.lengthToPoint({ pt.x,pt.y },cnt);
+			
+			const auto inter = f.lengthToPoint({ pt.x,pt.y });
 			
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
 				pts.insert(index, pt);
-				std::advance(cur_point = pts.begin(), index);
+				cur_point = std::next(pts.begin(), index);
 			}
 
 			else
 			{
 				pts.push_back(pt);
-				std::advance(cur_point = pts.begin(), pts.size() - 1);
+				cur_point = std::next(pts.begin(), pts.size() - 1);
 			}
 
 		}
@@ -284,8 +299,12 @@ class QCanvasWidget : public QWidget
 		ctx.setStrokeWidth(2);
 
 
+		
+
 		if (pts.size() > 1)
 		{
+			
+
 			if (interp.empty())
 					f.values<BLPoint>(std::back_inserter(interp),0, pts.size() - 1 + static_cast<int>(is_close), 0.01);
 
@@ -304,36 +323,35 @@ class QCanvasWidget : public QWidget
 				BLPath small_path;
 				complex_double der;
 
+				
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
-					[&](const auto &gsum, const auto &c, const complex_double &sincos, size_t k)
-				{
+					[&big_path,&small_path,&lines,&der,r_it= rad.cbegin()](const auto &gsum, const auto &c, const complex_double &sincos, size_t k)mutable
+					{
 
-					if (lines.empty())
-						lines.emplace_back(gsum.real(), gsum.imag());
+						if (lines.empty())
+							lines.emplace_back(gsum.real(), gsum.imag());
 
-					auto sum = gsum;
-					const auto co = std::conj(sincos);
-					const auto r1 = (c.first.real() + c.second.imag()) / 2.0;
-					const auto r2 = (c.first.imag() - c.second.real()) / 2.0;
-					const auto r3 = (c.first.real() - c.second.imag()) / 2.0;
-					const auto r4 = (c.first.imag() + c.second.real()) / 2.0;
-					const auto z1 = r1 * sincos;
-					const auto z2 = sincos * 1i*r2;// mul i 
-					const auto z3 = r3 * co;
-					const auto z4 = r4 * co * 1i;// mul i 
+						auto sum = gsum;
+						
+						const auto &rad = *r_it;
+						
+						const auto z1 = std::get<0>(rad) * sincos;
+						const auto z2 = sincos * 1i*std::get<1>(rad);// mul i 
+						const auto co = std::conj(sincos);
+						const auto z3 = std::get<2>(rad) * co;
+						const auto z4 = std::get<3>(rad) * co * 1i;// mul i 
 
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::sqrt(r1*r1 + r2 * r2)));
-					sum += z1 + z2;
-					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::sqrt(r3*r3 + r4 * r4)));
-					sum += z3 + z4;
-					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
-
-					fourier::derivative_step(der, c, sincos, k);
-
-				}
+						big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::get<4>(rad)));
+						sum += z1 + z2;
+						lines.emplace_back(sum.real(), sum.imag());
+						small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+						big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::get<5>(rad)));
+						sum += z3 + z4;
+						lines.emplace_back(sum.real(), sum.imag());
+						small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+						fourier::derivative_step(der, c, sincos, k);
+						++r_it;
+					}
 				);
 
 
@@ -403,7 +421,7 @@ public:
 
 	void setPos(double value)
 	{
-		pos = value / (2 * M_PI)*pts.size();
+		pos = value / (2 * fourtd::pi)*pts.size();
 		updateCanvas(true);
 	}
 
@@ -443,20 +461,17 @@ public:
 		f(pts.cbegin(), pts.cend())
 	{
 
-
+		createInfo.threadCount = std::thread::hardware_concurrency();
 	}
-
-	int i = 0;
-
 
 };
 
 
 
+
 int main(int argc, char *argv[])
 {
-
-
+	std::vector<int>a;
 	QApplication app(argc, argv);
 	QWidget win;
 
@@ -522,7 +537,7 @@ int main(int argc, char *argv[])
 
 	QObject::connect(positin, &QDial::valueChanged, [canvas, positin](int value)
 	{
-		canvas->setPos(2 * M_PI*value / positin->maximum());
+		canvas->setPos(2 * fourtd::pi *value / positin->maximum());
 	}
 	);
 
@@ -530,7 +545,6 @@ int main(int argc, char *argv[])
 
 	win.resize(QSize(800, 600));
 	win.show();
-
 	return app.exec();
 }
 

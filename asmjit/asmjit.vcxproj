@@ -28,12 +28,16 @@
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\constpool.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\cpuinfo.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\emitter.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\emitterutils.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\environment.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\errorhandler.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\formatter.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\func.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\globals.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\inst.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\jitallocator.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\jitruntime.cpp" />
-    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\logging.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\logger.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\operand.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\osutils.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\ralocal.cpp" />
@@ -50,15 +54,16 @@
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonestack.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonetree.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\core\zonevector.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86archdata.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86assembler.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86builder.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86callconv.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86compiler.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86features.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86formatter.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instapi.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86instdb.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86internal.cpp" />
-    <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86logging.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86operand.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\3rdparty\asmjit\src\asmjit\x86\x86rapass.cpp" />
   </ItemGroup>

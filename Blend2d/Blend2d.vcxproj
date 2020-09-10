@@ -94,10 +94,12 @@
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\runtime.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\scopedallocator.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\string.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\style.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\support.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\tables.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\thread.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\threadpool.cpp" />
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\uniqueidgenerator.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\trace.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\unicode.cpp" />
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\variant.cpp" />
