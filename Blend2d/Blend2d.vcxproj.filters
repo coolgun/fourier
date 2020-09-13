@@ -102,12 +102,6 @@
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rastercontext.cpp">
       <Filter>Source Files\raster</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterfiller.cpp">
-      <Filter>Source Files\raster</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkercontext.cpp">
-      <Filter>Source Files\raster</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkermanager.cpp">
       <Filter>Source Files\raster</Filter>
     </ClCompile>
@@ -281,6 +275,30 @@
     </ClCompile>
     <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\zonetree.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\analyticrasterizer.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rastercontextops.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterfetchdata.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkdata.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworkproc.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\raster\rasterworksynchronization.cpp">
+      <Filter>Source Files\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\style.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\blend2d\blend2d\src\blend2d\threading\uniqueidgenerator.cpp">
+      <Filter>Source Files\threading</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
