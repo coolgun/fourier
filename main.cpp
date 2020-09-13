@@ -187,9 +187,8 @@ class QCanvasWidget : public QWidget
 			rad.push_back({r1,r2,r3,r4,std::sqrt(r1*r1 + r2 * r2),std::sqrt(r3*r3 + r4 * r4)});
 		}
 
-
-
-		parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(f.square()).arg(f.length(0,2* fourtd::pi)));
+		if(parentWidget())
+			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(f.square()).arg(f.length(0,2* fourtd::pi)));
 		
 	}
 
@@ -287,6 +286,11 @@ class QCanvasWidget : public QWidget
 		}
 	}
 
+	void showEvent(QShowEvent* event) override
+	{
+		update_coeff();
+		QWidget::showEvent(event);
+	}
 
 
 	void onRenderB2D(BLContext& ctx) 
