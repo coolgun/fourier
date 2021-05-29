@@ -159,22 +159,34 @@ private:
 	void updateCoeff()
 	{
 		interp.clear();
-		rad.clear();
 		f.calcul_coeff(pts.cbegin(), pts.cend());
-		for (const auto& c : f.coeffs())
-		{
-			const auto r1 = (c.first.real() + c.second.imag()) / 2.0;
-			const auto r2 = (c.first.imag() - c.second.real()) / 2.0;
-			const auto r3 = (c.first.real() - c.second.imag()) / 2.0;
-			const auto r4 = (c.first.imag() + c.second.real()) / 2.0;
-			rad.emplace_back(r1, r2, r3, r4, std::sqrt(r1 * r1 + r2 * r2), std::sqrt(r3 * r3 + r4 * r4));
-		}
+
+		auto rad_future = std::async
+		(	
+			std::launch::async,
+			[this]()
+			{
+				decltype(this->rad) rad;
+				for (const auto& c : f.coeffs())
+				{
+					const auto r1 = (c.first.real() + c.second.imag()) / 2.0;
+					const auto r2 = (c.first.imag() - c.second.real()) / 2.0;
+					const auto r3 = (c.first.real() - c.second.imag()) / 2.0;
+					const auto r4 = (c.first.imag() + c.second.real()) / 2.0;
+					rad.emplace_back(r1, r2, r3, r4, std::sqrt(r1 * r1 + r2 * r2), std::sqrt(r3 * r3 + r4 * r4));
+				}
+				return rad;
+			}
+		);
 
 		if (parentWidget())
 		{
-			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(f.square()).arg(f.length(0, 2 * fourtd::pi)));
+			auto square = std::async(std::launch::async, [this] { return f.square(); });
+			auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
+			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(square.get()).arg(length.get()));
 		}
 
+		rad = std::move(rad_future.get());
 	}
 
 	void paintEvent(QPaintEvent*) override
@@ -187,7 +199,7 @@ private:
 
 	auto find_point(const BLPoint& test_pt)
 	{
-		return std::find_if(pts.begin(), pts.end(),
+		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
 			[&test_pt](auto& pt)
 			{
 				const auto d = pt - test_pt;
@@ -272,10 +284,17 @@ private:
 			ctx.setStrokeStyle(BLRgba32(0x800000FFu));
 
 			ctx.setStrokeWidth(4);
-			if (is_close)
-				ctx.strokePolygon(&interp[0], interp.size());
-			else
-				ctx.strokePolyline(&interp[0], interp.size());
+			std::async
+			(
+				std::launch::async,
+				[&ctx, this]()
+				{
+					if (is_close)
+						ctx.strokePolygon(&interp[0], interp.size());
+					else
+						ctx.strokePolyline(&interp[0], interp.size());
+				}
+			);
 
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
@@ -317,10 +336,17 @@ private:
 
 				if (show_circles)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0x32FFFFFFu));
-					ctx.strokePath(big_path);
-				}
+					std::async
+					(
+						std::launch::async,
+						[&ctx, &big_path]()
+						{
+							ctx.setStrokeWidth(2);
+							ctx.setStrokeStyle(BLRgba32(0x32FFFFFFu));
+							ctx.strokePath(big_path);
+						}
+					);
+				};
 
 				ctx.setStrokeWidth(1);
 
@@ -335,10 +361,10 @@ private:
 				ctx.setStrokeStyle(BLRgba32(0xFFFFFF00u));
 
 				if (show_tangent)
-					ctx.strokePolyline(&std::vector<BLPoint>({ {cur_pt.real() - der.real(),cur_pt.imag() - der.imag()},{cur_pt.real() + der.real(),cur_pt.imag() + der.imag()} })[0], 2);
+					ctx.strokeLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
 
 				if (show_normal)
-					ctx.strokePolyline(&std::vector<BLPoint>({ {cur_pt.real() - der.imag(),cur_pt.imag() + der.real()},{cur_pt.real() + der.imag(),cur_pt.imag() - der.real()} })[0], 2);
+					ctx.strokeLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
 				ctx.setStrokeWidth(3);
 				ctx.strokeCircle(lines.back().x, lines.back().y, 4);
 			}

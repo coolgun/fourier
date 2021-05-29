@@ -121,7 +121,7 @@ namespace fourtd
 			for (size_t i = 0; i < size; ++i)
 				ranges.emplace_back(0.0, std::numeric_limits<double>::max(), i * delta, (i + 1) * delta);
 
-			std::for_each(std::execution::par, ranges.begin(), ranges.end(),
+			std::for_each(std::execution::par_unseq, ranges.begin(), ranges.end(),
 				[this, &test_pt](auto &el)
 				{
 					static const double eps = 0.001;
@@ -152,7 +152,7 @@ namespace fourtd
 				}
 			);
 
-			const auto min_el = std::min_element(ranges.cbegin(), ranges.cend());
+			const auto min_el = std::min_element(std::execution::par_unseq, ranges.cbegin(), ranges.cend());
 			const auto t = std::get<1>(*min_el);
 			const auto val = nativ_value(t);
 			return { t,val,std::abs(val - test_pt) };
@@ -189,7 +189,8 @@ namespace fourtd
 				const auto al = a + i * d2;
 				const auto bl = a + (i + 1) * d2;
 
-				futures.emplace_back(std::async(std::launch::async,
+				futures.emplace_back(std::async(
+					std::launch::async,
 					[this, al, bl, delta]
 					{
 						double f1 = 0.0;
