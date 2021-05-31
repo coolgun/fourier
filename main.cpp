@@ -1,6 +1,5 @@
 #include <stdlib.h>
-#include <QtGui>
-#include <QtWidgets>
+#include <wx/wx.h>
 #include <blend2d.h>
 
 #include "trinterp.hpp"
@@ -22,9 +21,30 @@ namespace fourtd
 
 using namespace fourtd;
 
+inline int qRed(unsigned int rgb)
+{
+	return ((rgb >> 16) & 0xff);
+}
+
+inline int qGreen(unsigned int rgb)
+{
+	return ((rgb >> 8) & 0xff);
+}
+
+inline int qBlue(unsigned int rgb)
+{
+	return (rgb & 0xff);
+}
+
+inline int qAlpha(unsigned int rgb)
+{
+	return rgb >> 24;
+}
+
+
 namespace
 {
-	const QList<BLPoint> pi_symbol =
+	const std::deque<BLPoint> pi_symbol =
 	{
 		{408.0,130.0}
 		,{503.0,132.0}
@@ -57,18 +77,31 @@ namespace
 	constexpr double sel_tolerance = 7 * 7;
 }
 
-class QCanvasWidget : public QWidget
+class CanvasWidget : public wxPanel
 {
+	auto find_point(const BLPoint& test_pt)
+	{
+		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
+			[&test_pt](auto& pt)
+			{
+				const auto d = pt - test_pt;
+				return (d.x * d.x + d.y * d.y) < sel_tolerance;
+			}
+		);
+	}
 public:
 
-	QCanvasWidget() :
-		f(pts.cbegin(), pts.cend())
+	CanvasWidget(wxWindow* parent)
+		: wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
+		,f(pts.cbegin(), pts.cend())
 	{
-
+		//SetDoubleBuffered(true);
+		SetBackgroundStyle(wxBG_STYLE_PAINT);
 		createInfo.threadCount = std::thread::hardware_concurrency();
+		updateCoeff();
 	}
 
-	void clear()
+	void clear(wxCommandEvent&)
 	{
 		pts.clear();
 		cur_point = pts.end();
@@ -76,7 +109,7 @@ public:
 		updateCanvas();
 	}
 
-	void setPi()
+	void setPi(wxCommandEvent&)
 	{
 		pts = pi_symbol;
 		cur_point = pts.begin();
@@ -90,35 +123,102 @@ public:
 		updateCanvas(true);
 	}
 
-	void setShowCircles(bool value)
+	void setShowCircles(wxCommandEvent& evt)
 	{
-		show_circles = value;
+		show_circles = evt.IsChecked();
 		updateCanvas();
 	}
 
-	void setShowBrokenLine(bool value)
+	void setShowBrokenLine(wxCommandEvent& evt)
 	{
-		show_broken_line = value;
+		show_broken_line = evt.IsChecked();
 		updateCanvas();
 	}
 
-	void setShowTangent(bool value)
+	void setShowTangent(wxCommandEvent& evt)
 	{
-		show_tangent = value;
+		show_tangent = evt.IsChecked();
 		updateCanvas();
 	}
 
-	void setShowNormal(bool value)
+	void setShowNormal(wxCommandEvent& evt)
 	{
-		show_normal = value;
+		show_normal = evt.IsChecked();
 		updateCanvas();
 	}
 
-
-	void setIsClose(bool value)
+	void setIsClose(wxCommandEvent& evt)
 	{
 		interp.clear();
-		is_close = value;
+		is_close = evt.IsChecked();
+		updateCanvas();
+	}
+
+	void OnSize(wxSizeEvent& event)
+	{
+		const auto sz = event.GetSize();
+		blImage.create(sz.x, sz.y, BL_FORMAT_PRGB32);
+		updateCanvas(false);
+	}
+
+	void OnPaint(wxPaintEvent& WXUNUSED(event))
+	{
+		if (dirty)
+			renderCanvas();
+		wxPaintDC pdc(this);
+		const auto img = ConvertImage();
+		pdc.DrawBitmap(wxBitmap(img), 0, 0);
+	}
+
+	void OnMouseDoubleClick(wxMouseEvent& event)
+	{
+		const auto test = find_point(BLPoint(event.GetX(), event.GetY()));
+
+		if (test != pts.end())
+		{
+			pts.erase(test);
+			cur_point = pts.end();
+			updateCoeff();
+			updateCanvas();
+		}
+	}
+
+	void OnMouseUp(wxMouseEvent&)
+	{
+		cur_point = pts.end();
+	}
+
+	void OnMouseMove(wxMouseEvent& event)
+	{
+		const BLPoint pt(event.GetX(), event.GetY());
+		if (cur_point != pts.end())
+		{
+			*cur_point = pt;
+			updateCoeff();
+			updateCanvas();
+		}
+	}
+
+	void OnMouseDown(wxMouseEvent& event)
+	{
+		const BLPoint pt(event.GetX(), event.GetY());
+		cur_point = find_point(pt);
+		if (cur_point == pts.end())
+		{
+			const auto inter = f.lengthToPoint({ pt.x,pt.y });
+			if (std::get<2>(inter) < 5)
+			{
+				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
+				pts.insert(pts.begin() + index, pt);
+				cur_point = std::next(pts.begin(), index);
+			}
+			else
+			{
+				pts.push_back(pt);
+				cur_point = std::prev(pts.end());
+			}
+		}
+		updateCoeff();
 		updateCanvas();
 	}
 
@@ -136,24 +236,7 @@ private:
 			renderCanvas();
 		else
 			dirty = true;
-		repaint();
-	}
-
-	void resizeCanvas()
-	{
-		const auto sz = size();
-		if (substr.size() == sz)
-			return;
-		substr = QImage(sz, QImage::Format_ARGB32_Premultiplied);
-		blImage.createFromData(substr.width(), substr.height(), BL_FORMAT_PRGB32, substr.bits(), substr.bytesPerLine());
-		updateCanvas(false);
-	}
-
-	bool dirty = {};
-
-	void resizeEvent(QResizeEvent*) override
-	{
-		resizeCanvas();
+		Refresh();
 	}
 
 	void updateCoeff()
@@ -179,93 +262,12 @@ private:
 			}
 		);
 
-		if (parentWidget())
-		{
-			auto square = std::async(std::launch::async, [this] { return f.square(); });
-			auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
-			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(square.get()).arg(length.get()));
-		}
+		auto square = std::async(std::launch::async, [this] { return f.square(); });
+		auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
 
+		GetParent()->SetLabel(wxString::Format(wxT("fourier - S = %f, Len = %f"), square.get(), length.get()));
 		rad = std::move(rad_future.get());
 	}
-
-	void paintEvent(QPaintEvent*) override
-	{
-		QPainter painter(this);
-		if (dirty)
-			renderCanvas();
-		painter.drawImage(QPoint{ 0, 0 }, substr);
-	}
-
-	auto find_point(const BLPoint& test_pt)
-	{
-		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
-			[&test_pt](auto& pt)
-			{
-				const auto d = pt - test_pt;
-				return (d.x * d.x + d.y * d.y) < sel_tolerance;
-			}
-		);
-	}
-
-	void mouseDoubleClickEvent(QMouseEvent* event) override
-	{
-		const auto test = find_point(BLPoint(event->pos().x(), event->pos().y()));
-
-		if (test != pts.end())
-		{
-			pts.erase(test);
-			cur_point = pts.end();
-			updateCoeff();
-			updateCanvas();
-		}
-	}
-
-	void mousePressEvent(QMouseEvent* event) override
-	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
-		cur_point = find_point(pt);
-		if (cur_point == pts.end())
-		{
-			const auto inter = f.lengthToPoint({ pt.x,pt.y });
-			if (std::get<2>(inter) < 5)
-			{
-				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
-				pts.insert(index, pt);
-				cur_point = std::next(pts.begin(), index);
-			}
-			else
-			{
-				pts.push_back(pt);
-				cur_point = std::prev(pts.end());
-			}
-		}
-		updateCoeff();
-		updateCanvas();
-	}
-
-	void mouseReleaseEvent(QMouseEvent*) override
-	{
-		cur_point = pts.end();
-	}
-
-	void mouseMoveEvent(QMouseEvent* event) override
-	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
-		if (cur_point != pts.end())
-		{
-			*cur_point = pt;
-			updateCoeff();
-			updateCanvas();
-		}
-	}
-
-	void showEvent(QShowEvent* event) override
-	{
-		updateCoeff();
-		QWidget::showEvent(event);
-	}
-
 
 	void onRenderB2D(BLContext& ctx)
 	{
@@ -279,23 +281,17 @@ private:
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
-				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() - 1 + static_cast<int>(is_close), 0.01);
+				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() - 1 + static_cast<size_t>(is_close), 0.01);
 
 			ctx.setStrokeStyle(BLRgba32(0x800000FFu));
 
 			ctx.setStrokeWidth(4);
-			std::async
-			(
-				std::launch::async,
-				[&ctx, this]()
-				{
-					if (is_close)
-						ctx.strokePolygon(&interp[0], interp.size());
-					else
-						ctx.strokePolyline(&interp[0], interp.size());
-				}
-			);
-
+		
+			if (is_close)
+				ctx.strokePolygon(&interp[0], interp.size());
+			else
+				ctx.strokePolyline(&interp[0], interp.size());
+			
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
 				std::vector<BLPoint> lines;
@@ -305,48 +301,38 @@ private:
 
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
 					[&big_path, &small_path, &lines, &der, r_it = rad.cbegin()](const auto& gsum, const auto& c, const complex_double& sincos, size_t k)mutable
-				{
+					{
 
-					if (lines.empty())
-						lines.emplace_back(gsum.real(), gsum.imag());
+						if (lines.empty())
+							lines.emplace_back(gsum.real(), gsum.imag());
+						auto sum = gsum;
+						const auto& rad = *r_it;
+						const auto z1 = std::get<0>(rad) * sincos;
+						const auto z2 = sincos * complex_double(0, 1) * std::get<1>(rad);// mul i 
+						const auto co = std::conj(sincos);
+						const auto z3 = std::get<2>(rad) * co;
+						const auto z4 = std::get<3>(rad) * co * complex_double(0, 1);// mul i 
 
-					auto sum = gsum;
-
-					const auto& rad = *r_it;
-
-					const auto z1 = std::get<0>(rad) * sincos;
-					const auto z2 = sincos * 1i * std::get<1>(rad);// mul i 
-					const auto co = std::conj(sincos);
-					const auto z3 = std::get<2>(rad) * co;
-					const auto z4 = std::get<3>(rad) * co * 1i;// mul i 
-
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::get<4>(rad)));
-					sum += z1 + z2;
-					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::get<5>(rad)));
-					sum += z3 + z4;
-					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
-					fourier::derivative_step(der, c, sincos, k);
-					++r_it;
-				}
+						big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::get<4>(rad)));
+						sum += z1 + z2;
+						lines.emplace_back(sum.real(), sum.imag());
+						small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+						big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::get<5>(rad)));
+						sum += z3 + z4;
+						lines.emplace_back(sum.real(), sum.imag());
+						small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+						fourier::derivative_step(der, c, sincos, k);
+						++r_it;
+					}
 				);
 
 
 				if (show_circles)
 				{
-					std::async
-					(
-						std::launch::async,
-						[&ctx, &big_path]()
-						{
-							ctx.setStrokeWidth(2);
-							ctx.setStrokeStyle(BLRgba32(0x32FFFFFFu));
-							ctx.strokePath(big_path);
-						}
-					);
-				};
+					ctx.setStrokeWidth(2);
+					ctx.setStrokeStyle(BLRgba32(0x32FFFFFFu));
+					ctx.strokePath(big_path);
+				}
 
 				ctx.setStrokeWidth(1);
 
@@ -380,13 +366,45 @@ private:
 		ctx.fillPath(path);
 	}
 
+	wxImage ConvertImage() const
+	{
+
+		const auto numPixels = blImage.size().w * blImage.size().h;
+
+		if (startAlpha.size() < numPixels)
+		{
+			startAlpha.resize(numPixels);
+			startData.resize(numPixels * 3);
+		}
+
+		unsigned char* data = &startData[0];
+		unsigned char* alpha = &startAlpha[0];
+		auto* pd = static_cast<unsigned int*>(blImage.impl->pixelData);
+		
+		std::vector<size_t> l(numPixels);
+		std::iota(l.begin(), l.end(), 0);
+		
+		std::for_each(std::execution::par_unseq, l.cbegin(), l.cend(), [&](auto idx)
+			{
+				unsigned int colour = pd[idx];
+				auto* p_data = data+3 * idx;
+				p_data[0] = qRed(colour);
+				p_data[1] = qGreen(colour);
+				p_data[2] = qBlue(colour);
+				alpha[idx] = qAlpha(colour);
+			});
+		return wxImage(blImage.size().w, blImage.size().h, &startData[0], &startAlpha[0], true);
+	}
+
 
 private:
+	bool dirty = {};
+	mutable std::vector<unsigned char> startData;
+	mutable std::vector<unsigned char> startAlpha;
 	BLImage blImage;
-	QImage substr;
-	QList<BLPoint> pts = pi_symbol;
+	std::deque<BLPoint> pts = pi_symbol;
 	fourier f;
-	QList<BLPoint>::iterator	cur_point = pts.end();
+	std::deque<BLPoint>::iterator	cur_point = pts.end();
 	std::vector<BLPoint> interp;
 	std::vector<std::tuple<double, double, double, double, double, double>> rad;
 	bool is_close = true;
@@ -396,80 +414,122 @@ private:
 	bool show_normal{};
 	BLContextCreateInfo createInfo{};
 	double pos{};
+	wxDECLARE_EVENT_TABLE();
 };
 
-int main(int argc, char* argv[])
+wxBEGIN_EVENT_TABLE(CanvasWidget, wxScrolledWindow)
+	EVT_PAINT(CanvasWidget::OnPaint)
+	EVT_SIZE(CanvasWidget::OnSize)
+	EVT_MOTION(CanvasWidget::OnMouseMove)
+	EVT_LEFT_DOWN(CanvasWidget::OnMouseDown)
+	EVT_LEFT_UP(CanvasWidget::OnMouseUp)
+	EVT_LEFT_DCLICK(CanvasWidget::OnMouseDoubleClick)
+wxEND_EVENT_TABLE()
+
+
+class MyFrame : public wxFrame
 {
-	std::vector<int>a;
-	QApplication app(argc, argv);
-	QWidget win;
-
-	auto* h = new QHBoxLayout;
-	auto* l = new QVBoxLayout;
-	h->setContentsMargins(1, 1, 1, 1);
-	l->setContentsMargins(1, 1, 1, 1);
-	auto* clear = new QPushButton("Clear");
-	auto* pi = new QPushButton("Pi");
-	auto* is_closed = new QCheckBox("Closed");
-	is_closed->setChecked(true);
-	auto* show_circles = new QCheckBox("Circles");
-	auto* show_broken_line = new QCheckBox("Zigzag lines");
-	auto* show_tangent = new QCheckBox("Tangent");
-	auto* show_normal = new QCheckBox("Normal");
-
-	auto* anima = new QCheckBox("Animation");
-	auto* positin = new QDial();
-	positin->setWrapping(true);
-	auto* canvas = new QCanvasWidget;
-
-	QTimer timer;
-	QObject::connect(&timer, &QTimer::timeout, [positin]
+public:
+	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size) :
+		wxFrame((wxFrame*)NULL, wxID_ANY, title, pos, size,
+			wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
+	{
+		m_canvas = new CanvasWidget(this);
+		auto *panel = new wxPanel(this);
 		{
-			positin->setValue(positin->value() + 1);
+			auto* clear = new wxButton(panel, -1, wxT("Clear"));
+			clear->Bind(wxEVT_BUTTON, &CanvasWidget::clear, m_canvas);
+
+			auto* pi = new wxButton(panel, -1, wxT("PI"));
+			pi->Bind(wxEVT_BUTTON, &CanvasWidget::setPi, m_canvas);
+
+			auto* is_closed = new wxCheckBox(panel, 0, wxT("Closed"));
+			is_closed->SetValue(true);
+			is_closed->Bind(wxEVT_CHECKBOX, &CanvasWidget::setIsClose, m_canvas);
+
+			auto* show_circles = new wxCheckBox(panel, 0, wxT("Circles"));
+			show_circles->Bind(wxEVT_CHECKBOX, &CanvasWidget::setShowCircles, m_canvas);
+
+			auto* show_broken_line = new wxCheckBox(panel, 0, wxT("Zigzag lines"));
+			show_broken_line->Bind(wxEVT_CHECKBOX, &CanvasWidget::setShowBrokenLine, m_canvas);
+
+			auto* show_tangent = new wxCheckBox(panel, 0, wxT("Tangent"));
+			show_tangent->Bind(wxEVT_CHECKBOX, &CanvasWidget::setShowTangent, m_canvas);
+
+			auto* show_normal = new wxCheckBox(panel, 0, wxT("Normal"));
+			show_normal->Bind(wxEVT_CHECKBOX, &CanvasWidget::setShowNormal, m_canvas);
+
+			auto* anima = new wxCheckBox(panel, 0, wxT("Animation"));
+			anima->Bind(wxEVT_CHECKBOX, &MyFrame::setAnimation, this);
+
+			position = new wxSlider(panel,0,0,0,1000);
+			position->Bind(wxEVT_SLIDER, &MyFrame::setPos, this);
+		
+			auto* vbox = new wxBoxSizer(wxVERTICAL);
+			vbox->Add(clear);
+			vbox->Add(pi);
+			vbox->Add(is_closed);
+			vbox->Add(show_circles);
+			vbox->Add(show_broken_line);
+			vbox->Add(show_tangent);
+			vbox->Add(show_normal);
+			vbox->Add(anima);
+			vbox->Add(position);
+
+			panel->SetSizer(vbox);
 		}
-	);
-	timer.setInterval(100);
+		
+		auto *hbox = new wxBoxSizer(wxHORIZONTAL);
+		hbox->Add(panel, 0, wxEXPAND);
+		hbox->Add(m_canvas, 1, wxEXPAND | wxALL);
+		SetSizer(hbox);
 
-	l->addWidget(pi);
-	l->addWidget(clear);
-	l->addWidget(is_closed);
-	l->addWidget(show_circles);
-	l->addWidget(show_broken_line);
-	l->addWidget(show_tangent);
-	l->addWidget(show_normal);
-	l->addWidget(anima);
-	l->addWidget(positin);
-	l->addStretch();
-	h->addLayout(l);
-	h->addWidget(canvas, 1);
-	positin->setMaximum(100);
+		timer.SetOwner(this);
+		this->Bind(wxEVT_TIMER, &MyFrame::OnTimer, this);
+	}
 
-	QObject::connect(pi, &QPushButton::pressed, canvas, &QCanvasWidget::setPi);
-	QObject::connect(clear, &QPushButton::pressed, canvas, &QCanvasWidget::clear);
-	QObject::connect(is_closed, &QCheckBox::toggled, canvas, &QCanvasWidget::setIsClose);
-	QObject::connect(show_circles, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowCircles);
-	QObject::connect(show_broken_line, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowBrokenLine);
-	QObject::connect(show_tangent, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowTangent);
-	QObject::connect(show_normal, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowNormal);
+private:
+	
+	void setAnimation(wxCommandEvent& evt)
+	{
+		if (evt.IsChecked())
+			timer.Start(100);
+		else
+			timer.Stop();
+	}
 
-	QObject::connect(anima, &QCheckBox::toggled, [&timer](bool value)
-		{
-			if (value)
-				timer.start();
-			else
-				timer.stop();
-		}
-	);
+	void setPos(int value)
+	{
+		m_canvas->setPos(2 * fourtd::pi * value / position->GetMax());
+	}
 
-	QObject::connect(positin, &QDial::valueChanged, [canvas, positin](int value)
-		{
-			canvas->setPos(2 * fourtd::pi * value / positin->maximum());
-		}
-	);
+	void setPos(wxCommandEvent&)
+	{
+		setPos(position->GetValue());
+	}
 
-	win.setLayout(h);
+	void OnTimer(wxTimerEvent&)
+	{
+		position->SetValue((position->GetValue() + 1) % position->GetMax());
+		setPos(position->GetValue());
+	}
 
-	win.resize(QSize(800, 600));
-	win.show();
-	return app.exec();
-}
+	CanvasWidget *m_canvas;
+	wxSlider* position;
+	wxTimer timer;
+};
+
+class MyApp : public wxApp
+{
+public:
+	bool OnInit() wxOVERRIDE
+	{
+		if(!wxApp::OnInit()) return false;
+
+		auto* frame = new MyFrame(wxT("Drawing sample"), wxDefaultPosition, wxSize(800, 600));
+		frame->Show(true);
+		return true;
+	}
+};
+
+IMPLEMENT_APP(MyApp)
