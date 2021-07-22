@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <QtGui>
 #include <QtWidgets>
-#include <blend2d.h>
+#include <cairo.h>
+//#include <blend2d.h>
 
 #include "trinterp.hpp"
 
@@ -9,12 +10,12 @@ using namespace std::complex_literals;
 
 namespace fourtd
 {
-	template<> inline complex_double fourier::make_complex<const BLPoint&> [[nodiscard]] (const BLPoint& c)
+	template<> inline complex_double fourier::make_complex<const QPointF&> [[nodiscard]] (const QPointF& c)
 	{
-		return { c.x,c.y };
+		return {c.x(), c.y()};
 	}
 
-	template<> inline BLPoint fourier::make_value<BLPoint> [[nodiscard]] (const complex_double& z)
+	template<> inline QPointF fourier::make_value<QPointF> [[nodiscard]] (const complex_double& z)
 	{
 		return { z.real(), z.imag() };
 	}
@@ -65,7 +66,6 @@ public:
 		f(pts.cbegin(), pts.cend())
 	{
 
-		createInfo.threadCount = std::thread::hardware_concurrency();
 	}
 
 	void clear()
@@ -125,9 +125,13 @@ public:
 private:
 	void renderCanvas()
 	{
-		BLContext ctx(blImage, createInfo);
-		onRenderB2D(ctx);
-		ctx.end();
+		auto* surf = cairo_image_surface_create_for_data(substr.bits(),
+			CAIRO_FORMAT_RGB24, substr.width(), substr.height(), substr.bytesPerLine());
+		auto *cr = cairo_create(surf);
+		cairo_surface_destroy(surf);
+		onRenderB2D(cr);
+		cairo_destroy(cr);
+
 	}
 
 	void updateCanvas(bool force = false)
@@ -145,7 +149,6 @@ private:
 		if (substr.size() == sz)
 			return;
 		substr = QImage(sz, QImage::Format_ARGB32_Premultiplied);
-		blImage.createFromData(substr.width(), substr.height(), BL_FORMAT_PRGB32, substr.bits(), substr.bytesPerLine());
 		updateCanvas(false);
 	}
 
@@ -201,20 +204,20 @@ private:
 		painter.drawImage(QPoint{ 0, 0 }, substr);
 	}
 
-	auto find_point(const BLPoint& test_pt)
+	auto find_point(const QPointF& test_pt)
 	{
 		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
 			[&test_pt](auto& pt)
 			{
 				const auto d = pt - test_pt;
-				return (d.x * d.x + d.y * d.y) < sel_tolerance;
+				return (d.x() * d.x() + d.y() * d.y()) < sel_tolerance;
 			}
 		);
 	}
 
 	void mouseDoubleClickEvent(QMouseEvent* event) override
 	{
-		const auto test = find_point(BLPoint(event->pos().x(), event->pos().y()));
+		const auto test = find_point(event->pos());
 
 		if (test != pts.end())
 		{
@@ -227,20 +230,19 @@ private:
 
 	void mousePressEvent(QMouseEvent* event) override
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
-		cur_point = find_point(pt);
+		cur_point = find_point(event->pos());
 		if (cur_point == pts.end())
 		{
-			const auto inter = f.lengthToPoint({ pt.x,pt.y });
+			const auto inter = f.lengthToPoint({ 1.0 * event->pos().x(), 1.0 * event->pos().y()});
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
-				pts.insert(index, pt);
+				pts.insert(index, event->pos());
 				cur_point = std::next(pts.begin(), index);
 			}
 			else
 			{
-				pts.push_back(pt);
+				pts.push_back(event->pos());
 				cur_point = std::prev(pts.end());
 			}
 		}
@@ -255,10 +257,9 @@ private:
 
 	void mouseMoveEvent(QMouseEvent* event) override
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
 		if (cur_point != pts.end())
 		{
-			*cur_point = pt;
+			*cur_point = event->pos();
 			updateCoeff();
 			updateCanvas();
 		}
@@ -271,11 +272,46 @@ private:
 	}
 
 
-	void onRenderB2D(BLContext& ctx)
+	void onRenderB2D(cairo_t* cr)
 	{
 
-		ctx.setFillStyle(BLRgba32(0xFF000000u));
-		ctx.fillAll();
+		cairo_set_source_rgb(cr, 0, 0, 0);
+		cairo_paint(cr);
+		//cairo_scale(cr, width(), height());
+
+		const auto strokePolygon = [cr](const auto &pol, bool close)
+		{
+			if (pol.size() < 2) return;
+
+			for (const auto& pt: pol)
+			{
+				cairo_line_to(cr, pt.x(), pt.y());
+			}
+
+			if(close) 
+				cairo_close_path(cr);
+			cairo_stroke_preserve(cr);
+			cairo_stroke(cr);
+			
+		};
+
+		const auto drawCircle = [cr](const auto& pol, bool fill)
+		{
+			if (pol.empty()) return;
+
+			for (const auto& pt : pol)
+			{
+				cairo_move_to(cr, pt.first.x() + pt.second, pt.first.y());
+				cairo_arc(cr, pt.first.x(), pt.first.y(), pt.second, 0, 2 * M_PI);
+				cairo_close_path(cr);
+			}
+			cairo_stroke_preserve(cr);
+			if(fill)
+				cairo_fill(cr);
+			else
+				cairo_stroke(cr);
+	
+		};
 
 		if (pts.size() > 1)
 		{
@@ -292,9 +328,9 @@ private:
 
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
-				std::vector<BLPoint> lines;
-				BLPath big_path;
-				BLPath small_path;
+				std::vector<QPointF> lines;
+				QList<QPair<QPointF, double>> big_path;
+				QList<QPair<QPointF, double>> small_path;
 				complex_double der;
 
 				std::list<complex_double> vector_list;
@@ -335,7 +371,7 @@ private:
 					ctx.strokePath(big_path);
 				}
 
-				ctx.setStrokeWidth(1);
+				cairo_set_line_width(cr, 1);
 
 				if (show_broken_line)
 				{
@@ -350,30 +386,39 @@ private:
 				ctx.setStrokeStyle(BLRgba32(0xFFFF0000u));
 
 				if (show_tangent)
-					ctx.strokeLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
+				{
+					cairo_move_to(cr, cur_pt.real() - der.real(), cur_pt.imag() - der.imag());
+					cairo_line_to(cr, cur_pt.real() + der.real(), cur_pt.imag() + der.imag());
+					cairo_stroke(cr);
+				}
 
 				if (show_normal)
-					ctx.strokeLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
-				ctx.setStrokeWidth(3);
-				ctx.strokeCircle(lines.back().x, lines.back().y, 4);
+				{
+					cairo_move_to(cr, cur_pt.real() - der.imag(), cur_pt.imag() + der.real());
+					cairo_line_to(cr, cur_pt.real() + der.imag(), cur_pt.imag() - der.real());
+					cairo_stroke(cr);
+				}
+				cairo_set_line_width(cr, 3);
+
+				drawCircle(QList<QPair<QPointF, double>>{ { lines.back(), 3}}, false);
 			}
 		}
 
-		BLPath path;
+		cairo_set_source_rgba(cr, 1, 1, 1, 1);
 
+		QList<QPair<QPointF, double>> path;
 		for (const auto& pt : pts)
 		{
-			path.addCircle(BLCircle(pt.x, pt.y, 3));
+			path.push_back({ {pt.x(), pt.y()}, 2 });
 		}
-		ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-		ctx.fillPath(path);
+		drawCircle(path, true);
 	}
 
 
 private:
-	BLImage blImage;
+	//BLImage blImage;
 	QImage substr;
-	QList<BLPoint> pts = pi_symbol;
+	QList<QPointF> pts = pi_symbol;
 	fourier f;
 	QList<BLPoint>::iterator cur_point = pts.end();
 	std::vector<BLPoint> interp;
@@ -383,7 +428,6 @@ private:
 	bool show_broken_line{};
 	bool show_tangent{};
 	bool show_normal{};
-	BLContextCreateInfo createInfo{};
 	double pos{};
 };
 
