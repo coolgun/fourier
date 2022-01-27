@@ -24,7 +24,7 @@ using namespace fourtd;
 
 namespace
 {
-	const QList<BLPoint> pi_symbol =
+	inline const QList<BLPoint> pi_symbol =
 	{
 		{408.0,130.0}
 		,{503.0,132.0}
@@ -166,14 +166,17 @@ private:
 			std::launch::async,
 			[this]()
 			{
-				decltype(this->rad) rad;
+
+				decltype(radii) rad;
 				for (const auto& c : f.coeffs())
 				{
-					const auto r1 = (c.first.real() + c.second.imag()) / 2.0;
-					const auto r2 = (c.first.imag() - c.second.real()) / 2.0;
-					const auto r3 = (c.first.real() - c.second.imag()) / 2.0;
-					const auto r4 = (c.first.imag() + c.second.real()) / 2.0;
-					rad.emplace_back(r1, r2, r3, r4, std::sqrt(r1 * r1 + r2 * r2), std::sqrt(r3 * r3 + r4 * r4));
+					// A*cos(w)+B*sin(w) ->  Z1*e^iw+Z2*^-iw
+					rad.emplace_back
+					(
+						std::piecewise_construct,
+						std::forward_as_tuple((c.first.real() + c.second.imag()) / 2.0, (c.first.imag() - c.second.real()) / 2.0),
+						std::forward_as_tuple((c.first.real() - c.second.imag()) / 2.0, (c.first.imag() + c.second.real()) / 2.0)
+					);
 				}
 				return rad;
 			}
@@ -186,7 +189,7 @@ private:
 			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(square.get()).arg(length.get()));
 		}
 
-		rad = std::move(rad_future.get());
+		radii = std::move(rad_future.get());
 	}
 
 	void paintEvent(QPaintEvent*) override
@@ -273,15 +276,12 @@ private:
 		ctx.setFillStyle(BLRgba32(0xFF000000u));
 		ctx.fillAll();
 
-		ctx.setStrokeStyle(BLRgba32(0xFFFF0000u));
-		ctx.setStrokeWidth(2);
-
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
 				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() - 1 + static_cast<int>(is_close), 0.01);
 
-			ctx.setStrokeStyle(BLRgba32(0x800000FFu));
+			ctx.setStrokeStyle(BLRgba32(0xFFFFFF00u));
 
 			ctx.setStrokeWidth(4);
 			std::async
@@ -304,7 +304,7 @@ private:
 				complex_double der;
 
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
-					[&big_path, &small_path, &lines, &der, r_it = rad.cbegin()](const auto& gsum, const auto& c, const complex_double& sincos, size_t k)mutable
+					[&big_path, &small_path, &lines, &der, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
 				{
 
 					if (lines.empty())
@@ -312,23 +312,18 @@ private:
 
 					auto sum = gsum;
 
-					const auto& rad = *r_it;
+					const auto z1 = r_it->first * sincos;
+					const auto z2 = r_it->second * std::conj(sincos);
 
-					const auto z1 = std::get<0>(rad) * sincos;
-					const auto z2 = sincos * 1i * std::get<1>(rad);// mul i 
-					const auto co = std::conj(sincos);
-					const auto z3 = std::get<2>(rad) * co;
-					const auto z4 = std::get<3>(rad) * co * 1i;// mul i 
-
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::get<4>(rad)));
-					sum += z1 + z2;
+					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(z1)));
+					sum += z1;
 					lines.emplace_back(sum.real(), sum.imag());
 					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::get<5>(rad)));
-					sum += z3 + z4;
+					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(z2)));
+					sum += z2;
 					lines.emplace_back(sum.real(), sum.imag());
 					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
-					fourier::derivative_step(der, c, sincos, k);
+					der = fourier::derivative_step(der, coeff, sincos, k);
 					++r_it;
 				}
 				);
@@ -342,7 +337,7 @@ private:
 						[&ctx, &big_path]()
 						{
 							ctx.setStrokeWidth(2);
-							ctx.setStrokeStyle(BLRgba32(0x32FFFFFFu));
+							ctx.setStrokeStyle(BLRgba32(0xF000B3B3u));
 							ctx.strokePath(big_path);
 						}
 					);
@@ -352,13 +347,15 @@ private:
 
 				if (show_broken_line)
 				{
-					ctx.setStrokeStyle(BLRgba32(0xFFFF0000u));
-					ctx.setFillStyle(BLRgba32(0xFFFF0000u));
+					ctx.setStrokeWidth(2);
+					ctx.setStrokeStyle(BLRgba32(0xFFFFFFFFu));
+					ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
 					ctx.strokePolyline(&lines[0], lines.size());
 					ctx.fillPath(small_path);
 				}
 
-				ctx.setStrokeStyle(BLRgba32(0xFFFFFF00u));
+				ctx.setStrokeWidth(1);
+				ctx.setStrokeStyle(BLRgba32(0xFFFF0000u));
 
 				if (show_tangent)
 					ctx.strokeLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
@@ -386,9 +383,9 @@ private:
 	QImage substr;
 	QList<BLPoint> pts = pi_symbol;
 	fourier f;
-	QList<BLPoint>::iterator	cur_point = pts.end();
+	QList<BLPoint>::iterator cur_point = pts.end();
 	std::vector<BLPoint> interp;
-	std::vector<std::tuple<double, double, double, double, double, double>> rad;
+	std::vector<std::pair<complex_double, complex_double>> radii;
 	bool is_close = true;
 	bool show_circles{};
 	bool show_broken_line{};
