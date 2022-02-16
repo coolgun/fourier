@@ -158,14 +158,14 @@ namespace fourtd
 			return { t,val,std::abs(val - test_pt) };
 		}
 
-		double indexToAngle(double t) const
+		double indexToAngle(double index) const noexcept
 		{
-			return (1 + 2 * t) * pi / size;
+			return (1 + 2 * index) * pi / size;
 		}
 
-		double angleToIndex(double t) const
+		double angleToIndex(double angle) const noexcept
 		{
-			return (t * size / pi - 1.0) / 2.0;
+			return (angle * size / pi - 1.0) / 2.0;
 		}
 
 		template<class _FwdIt>
@@ -321,7 +321,7 @@ namespace fourtd
 			const auto local_a = indexToAngle(a);
 			const auto local_b = indexToAngle(b);
 			const auto local_delta = 2 * delta * pi / size;
-			TrigonometricIterator it(local_delta, a);
+			TrigonometricIterator it(local_delta, local_a);
 
 			for (double t = local_a; t < local_b; t += local_delta, ++it)
 			{
@@ -344,6 +344,11 @@ namespace fourtd
 		const auto& coeffs() const
 		{
 			return ab;
+		}
+
+		const auto& firstCoeff() const
+		{
+			return a0;
 		}
 
 		complex_double value(double idx) const
