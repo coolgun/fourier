@@ -54,7 +54,7 @@ namespace
 		,{188.0,131.0}
 		,{243.0,131.0}
 	};
-	constexpr double sel_tolerance = 7 * 7;
+	constexpr double sel_tolerance = 7.0 * 7.0;
 }
 
 class QCanvasWidget : public QWidget
@@ -166,9 +166,10 @@ private:
 			std::launch::async,
 			[this]()
 			{
-
+				const auto& coeff = f.coeffs();
 				decltype(radii) rad;
-				for (const auto& c : f.coeffs())
+				rad.reserve(coeff.size());
+				for (const auto& c : coeff)
 				{
 					// A*cos(w)+B*sin(w) ->  Z1*e^iw+Z2*^-iw
 					rad.emplace_back
@@ -279,22 +280,15 @@ private:
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
-				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() - 1 + static_cast<int>(is_close), 0.01);
+				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
 
 			ctx.setStrokeStyle(BLRgba32(0xFFFFFF00u));
 
 			ctx.setStrokeWidth(4);
-			std::async
-			(
-				std::launch::async,
-				[&ctx, this]()
-				{
-					if (is_close)
-						ctx.strokePolygon(&interp[0], interp.size());
-					else
-						ctx.strokePolyline(&interp[0], interp.size());
-				}
-			);
+			if (is_close)
+				ctx.strokePolygon(&interp[0], interp.size());
+			else
+				ctx.strokePolyline(&interp[0], interp.size());
 
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
@@ -303,8 +297,10 @@ private:
 				BLPath small_path;
 				complex_double der;
 
+				std::list<complex_double> vector_list;
+
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
-					[&big_path, &small_path, &lines, &der, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
+					[&big_path, &small_path, &lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
 				{
 
 					if (lines.empty())
@@ -315,33 +311,29 @@ private:
 					const auto z1 = r_it->first * sincos;
 					const auto z2 = r_it->second * std::conj(sincos);
 
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(z1)));
-					sum += z1;
-					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(z2)));
-					sum += z2;
-					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+					vector_list.push_front(z2);
+					vector_list.push_back(z1);
+
 					der = fourier::derivative_step(der, coeff, sincos, k);
 					++r_it;
 				}
 				);
 
+				complex_double sum= f.firstCoeff();
+				for (const auto &vec : vector_list)
+				{
+					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(vec)));
+					sum += vec;
+					lines.emplace_back(sum.real(), sum.imag());
+					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+				}
 
 				if (show_circles)
 				{
-					std::async
-					(
-						std::launch::async,
-						[&ctx, &big_path]()
-						{
-							ctx.setStrokeWidth(2);
-							ctx.setStrokeStyle(BLRgba32(0xF000B3B3u));
-							ctx.strokePath(big_path);
-						}
-					);
-				};
+					ctx.setStrokeWidth(2);
+					ctx.setStrokeStyle(BLRgba32(0xF000B3B3u));
+					ctx.strokePath(big_path);
+				}
 
 				ctx.setStrokeWidth(1);
 
