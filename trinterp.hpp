@@ -329,11 +329,11 @@ namespace fourtd
 			}
 		}
 
-		template<typename C, typename OutIt> void values(OutIt it, double a, double b, double delta = 0.01) const
+		template<typename C, typename OutIt, typename MakeValue = decltype(make_value<C>) > void values(OutIt it, double a, double b, double delta = 0.01, MakeValue mv = make_value<C>) const
 		{
 			values_impl
 			(
-				[&it](const complex_double& v) {*it = make_value<C>(v); ++it; }
+				[&it,&mv](const complex_double& v) {*it = mv(v); ++it; }
 				, [this](const complex_double& start_sincos)
 				{
 					return single_nativ_value_it(start_sincos);
