@@ -1,20 +1,33 @@
 #include <stdlib.h>
-#include <QtGui>
-#include <QtWidgets>
-#include <blend2d.h>
-
+#include <Wt/WApplication.h>
+#include <Wt/WContainerWidget.h>
+#include <Wt/WPaintDevice.h>
+#include <Wt/WPaintedWidget.h>
+#include <Wt/WPainter.h>
+#include <Wt/WSpinBox.h>
+#include <Wt/WEvent.h>
+#include <Wt/WPushButton.h>
+#include <Wt/WHBoxLayout.h>
+#include <Wt/WVBoxLayout.h>
+#include <Wt/WPushButton.h>
+#include <Wt/WPen.h>
+#include <Wt/WSlider.h>
+#include <Wt/WCheckBox.h>
+#include <Wt/WLocale.h>
+#include <Wt/WTimer.h>
 #include "trinterp.hpp"
+
 
 using namespace std::complex_literals;
 
 namespace fourtd
 {
-	template<> inline complex_double fourier::make_complex<const BLPoint&> [[nodiscard]] (const BLPoint& c)
+	template<> inline complex_double fourier::make_complex<const Wt::WPointF&> [[nodiscard]] (const Wt::WPointF& c)
 	{
-		return { c.x,c.y };
+		return { c.x(), c.y() };
 	}
 
-	template<> inline BLPoint fourier::make_value<BLPoint> [[nodiscard]] (const complex_double& z)
+	template<> inline Wt::WPointF fourier::make_value<Wt::WPointF> [[nodiscard]] (const complex_double& z)
 	{
 		return { z.real(), z.imag() };
 	}
@@ -24,7 +37,7 @@ using namespace fourtd;
 
 namespace
 {
-	inline const QList<BLPoint> pi_symbol =
+	inline const std::vector<Wt::WPointF> pi_symbol =
 	{
 		{408.0,130.0}
 		,{503.0,132.0}
@@ -54,18 +67,23 @@ namespace
 		,{188.0,131.0}
 		,{243.0,131.0}
 	};
-	constexpr double sel_tolerance = 7.0 * 7.0;
+	constexpr double sel_tolerance = 7.0;
 }
 
-class QCanvasWidget : public QWidget
+class QCanvasWidget : public Wt::WPaintedWidget
 {
 public:
 
-	QCanvasWidget() :
+	QCanvasWidget(Wt::WApplication *app) :
+		app(app),
 		f(pts.cbegin(), pts.cend())
 	{
-
-		createInfo.threadCount = std::thread::hardware_concurrency();
+		resize(800, 600);
+		mouseWentDown().connect(this, &QCanvasWidget::mousePressEvent);
+		mouseWentUp().connect(this, &QCanvasWidget::mouseReleaseEvent);
+		mouseMoved().connect(this, &QCanvasWidget::mouseMoveEvent);
+		doubleClicked().connect(this, &QCanvasWidget::mouseDoubleClickEvent);
+		updateCoeff();
 	}
 
 	void clear()
@@ -79,9 +97,14 @@ public:
 	void setPi()
 	{
 		pts = pi_symbol;
-		cur_point = pts.begin();
+		cur_point = pts.end();
 		updateCoeff();
 		updateCanvas();
+	}
+
+	void setPosC(double value)
+	{
+		setPos(value * fourtd::pi / 180.0);
 	}
 
 	void setPos(double value)
@@ -123,37 +146,10 @@ public:
 	}
 
 private:
-	void renderCanvas()
-	{
-		BLContext ctx(blImage, createInfo);
-		onRenderB2D(ctx);
-		ctx.end();
-	}
-
+	
 	void updateCanvas(bool force = false)
 	{
-		if (force)
-			renderCanvas();
-		else
-			dirty = true;
-		repaint();
-	}
-
-	void resizeCanvas()
-	{
-		const auto sz = size();
-		if (substr.size() == sz)
-			return;
-		substr = QImage(sz, QImage::Format_ARGB32_Premultiplied);
-		blImage.createFromData(substr.width(), substr.height(), BL_FORMAT_PRGB32, substr.bits(), substr.bytesPerLine());
-		updateCanvas(false);
-	}
-
-	bool dirty = {};
-
-	void resizeEvent(QResizeEvent*) override
-	{
-		resizeCanvas();
+		update();
 	}
 
 	void updateCoeff()
@@ -183,38 +179,37 @@ private:
 			}
 		);
 
-		if (parentWidget())
+		if (parent())
 		{
 			auto square = std::async(std::launch::async, [this] { return f.square(); });
 			auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
-			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(square.get()).arg(length.get()));
+			app->setTitle( Wt::WString("fourier S={1},Len={2}")
+				.arg(Wt::WLocale::currentLocale().toFixedString(square.get(), 2))
+				.arg(Wt::WLocale::currentLocale().toFixedString(length.get(), 2)));
 		}
 
 		radii = std::move(rad_future.get());
 	}
 
-	void paintEvent(QPaintEvent*) override
+	void paintEvent(Wt::WPaintDevice* paintDevice) override
 	{
-		QPainter painter(this);
-		if (dirty)
-			renderCanvas();
-		painter.drawImage(QPoint{ 0, 0 }, substr);
+		onRenderB2D(paintDevice);
 	}
 
-	auto find_point(const BLPoint& test_pt)
+	auto find_point(const Wt::WPointF& test_pt)
 	{
 		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
 			[&test_pt](auto& pt)
 			{
-				const auto d = pt - test_pt;
-				return (d.x * d.x + d.y * d.y) < sel_tolerance;
+				return hypot(pt.x() - test_pt.x(), pt.y() - test_pt.y()) < sel_tolerance;
 			}
 		);
 	}
 
-	void mouseDoubleClickEvent(QMouseEvent* event) override
+	void mouseDoubleClickEvent(const Wt::WMouseEvent& event)
 	{
-		const auto test = find_point(BLPoint(event->pos().x(), event->pos().y()));
+		const auto pos = static_cast<Wt::WPointF>(event.widget());
+		const auto test = find_point({pos.x(), pos.y()});
 
 		if (test != pts.end())
 		{
@@ -225,17 +220,17 @@ private:
 		}
 	}
 
-	void mousePressEvent(QMouseEvent* event) override
+	void mousePressEvent(const Wt::WMouseEvent& event)
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
+		const auto pt = static_cast<Wt::WPointF>(event.widget());
 		cur_point = find_point(pt);
 		if (cur_point == pts.end())
 		{
-			const auto inter = f.lengthToPoint({ pt.x,pt.y });
+			const auto inter = f.lengthToPoint({ pt.x(), pt.y() });
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
-				pts.insert(index, pt);
+				pts.insert(pts.begin() + index, pt);
 				cur_point = std::next(pts.begin(), index);
 			}
 			else
@@ -248,14 +243,14 @@ private:
 		updateCanvas();
 	}
 
-	void mouseReleaseEvent(QMouseEvent*) override
+	void mouseReleaseEvent(const Wt::WMouseEvent&)
 	{
 		cur_point = pts.end();
 	}
 
-	void mouseMoveEvent(QMouseEvent* event) override
+	void mouseMoveEvent(const Wt::WMouseEvent& event)
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
+		const auto pt = static_cast<Wt::WPointF>(event.widget());
 		if (cur_point != pts.end())
 		{
 			*cur_point = pt;
@@ -264,43 +259,37 @@ private:
 		}
 	}
 
-	void showEvent(QShowEvent* event) override
+	void onRenderB2D(Wt::WPaintDevice* paintDevice)
 	{
-		updateCoeff();
-		QWidget::showEvent(event);
-	}
-
-
-	void onRenderB2D(BLContext& ctx)
-	{
-
-		ctx.setFillStyle(BLRgba32(0xFF000000u));
-		ctx.fillAll();
+		Wt::WPainter painter(paintDevice);
+		painter.setBrush(Wt::WBrush(Wt::StandardColor::Black));
+		painter.drawRect(0.0, 0.0, width().value(), height().value());
 
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
-				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
+				f.values<Wt::WPointF>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
 
-			ctx.setStrokeStyle(BLRgba32(0xFFFFFF00u));
-
-			ctx.setStrokeWidth(4);
+			Wt::WPen pen(Wt::StandardColor::Blue);
+			pen.setWidth(4);
+			painter.setPen(pen);
+			
 			if (is_close)
-				ctx.strokePolygon(&interp[0], interp.size());
+				painter.drawPolygon(&interp[0], interp.size());
 			else
-				ctx.strokePolyline(&interp[0], interp.size());
+				painter.drawPolyline(&interp[0], interp.size());
 
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
-				std::vector<BLPoint> lines;
-				BLPath big_path;
-				BLPath small_path;
+				std::vector< Wt::WPointF> lines;
+				Wt::WPainterPath big_path;
+				Wt::WPainterPath small_path;
 				complex_double der;
 
 				std::list<complex_double> vector_list;
 
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
-					[&big_path, &small_path, &lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
+					[&lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
 				{
 
 					if (lines.empty())
@@ -319,146 +308,190 @@ private:
 				}
 				);
 
-				complex_double sum= f.firstCoeff();
+				auto sum= f.firstCoeff();
 				for (const auto &vec : vector_list)
 				{
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(vec)));
+					const auto r = std::abs(vec);
+					big_path.addEllipse(sum.real() - r, sum.imag() -r , 2 * r, 2 * r);
 					sum += vec;
 					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+					small_path.addEllipse(sum.real() -  2, sum.imag() -  2 , 4 , 4);
 				}
 
 				if (show_circles)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0xF000B3B3u));
-					ctx.strokePath(big_path);
+					pen.setWidth(2);
+					pen.setColor(Wt::WColor(0,0xB3,0xB3, 0xF0));
+					painter.setPen(pen);
+					painter.setBrush(Wt::BrushStyle::None);
+					painter.drawPath(big_path);
 				}
 
-				ctx.setStrokeWidth(1);
 
 				if (show_broken_line)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0xFFFFFFFFu));
-					ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-					ctx.strokePolyline(&lines[0], lines.size());
-					ctx.fillPath(small_path);
+					pen.setWidth(2);
+					pen.setColor(Wt::StandardColor::White);
+					painter.setPen(pen);
+					painter.drawPolyline(&lines[0], lines.size());
+					painter.fillPath(small_path, Wt::WBrush(Wt::StandardColor::White));
 				}
 
-				ctx.setStrokeWidth(1);
-				ctx.setStrokeStyle(BLRgba32(0xFFFF0000u));
+				pen.setWidth(1);
+				pen.setColor(Wt::StandardColor::Red);
+				painter.setPen(pen);
 
 				if (show_tangent)
-					ctx.strokeLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
+					painter.drawLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
 
 				if (show_normal)
-					ctx.strokeLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
-				ctx.setStrokeWidth(3);
-				ctx.strokeCircle(lines.back().x, lines.back().y, 4);
+					painter.drawLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
+				
+				pen.setWidth(3);
+				painter.setPen(pen);
+				painter.setBrush(Wt::BrushStyle::None);
+				painter.drawEllipse(lines.back().x() - 4, lines.back().y() - 4, 8, 8);
 			}
 		}
 
-		BLPath path;
-
+		painter.setPen(Wt::PenStyle::None);
+		painter.setBrush(Wt::WBrush(Wt::StandardColor::White));
+		
 		for (const auto& pt : pts)
 		{
-			path.addCircle(BLCircle(pt.x, pt.y, 3));
+			painter.drawEllipse(pt.x() - 3 , pt.y() - 3, 6, 6);
 		}
-		ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-		ctx.fillPath(path);
 	}
 
 
 private:
-	BLImage blImage;
-	QImage substr;
-	QList<BLPoint> pts = pi_symbol;
+	Wt::WApplication* app;
+	std::vector<Wt::WPointF> pts = pi_symbol;
 	fourier f;
-	QList<BLPoint>::iterator cur_point = pts.end();
-	std::vector<BLPoint> interp;
+	std::vector<Wt::WPointF>::iterator cur_point = pts.end();
+	std::vector<Wt::WPointF> interp;
 	std::vector<std::pair<complex_double, complex_double>> radii;
 	bool is_close = true;
 	bool show_circles{};
 	bool show_broken_line{};
 	bool show_tangent{};
 	bool show_normal{};
-	BLContextCreateInfo createInfo{};
 	double pos{};
 };
 
-int main(int argc, char* argv[])
+
+std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
 {
-	std::vector<int>a;
-	QApplication app(argc, argv);
-	QWidget win;
+	auto app = std::make_unique<Wt::WApplication>(env);
+	auto container = std::make_unique<Wt::WContainerWidget>();
 
-	auto* h = new QHBoxLayout;
-	auto* l = new QVBoxLayout;
-	h->setContentsMargins(1, 1, 1, 1);
-	l->setContentsMargins(1, 1, 1, 1);
-	auto* clear = new QPushButton("Clear");
-	auto* pi = new QPushButton("Pi");
-	auto* is_closed = new QCheckBox("Closed");
+	auto painting = std::make_unique<QCanvasWidget>(app.get());
+	auto clear = std::make_unique<Wt::WPushButton>("Clear");
+	clear->clicked().connect([painting = painting.get()]{ painting->clear(); });
+
+	auto pi = std::make_unique<Wt::WPushButton>("Pi");
+	pi->clicked().connect([painting = painting.get()]{ painting->setPi(); });
+
+	auto is_closed = std::make_unique<Wt::WCheckBox>("Closed");
 	is_closed->setChecked(true);
-	auto* show_circles = new QCheckBox("Circles");
-	auto* show_broken_line = new QCheckBox("Zigzag lines");
-	auto* show_tangent = new QCheckBox("Tangent");
-	auto* show_normal = new QCheckBox("Normal");
+	is_closed->changed().connect([is_closed = is_closed.get(), painting = painting.get()]
+		{ 
+			painting->setIsClose(is_closed->isChecked()); 
+		});
 
-	auto* anima = new QCheckBox("Animation");
-	auto* positin = new QDial();
-	positin->setWrapping(true);
-	auto* canvas = new QCanvasWidget;
-
-	QTimer timer;
-	QObject::connect(&timer, &QTimer::timeout, [positin]
+	auto show_circles = std::make_unique<Wt::WCheckBox>("Circles");
+	show_circles->changed().connect([show_circles = show_circles.get(), painting = painting.get()]
 		{
-			positin->setValue(positin->value() + 1);
-		}
-	);
-	timer.setInterval(100);
+			painting->setShowCircles(show_circles->isChecked());
+		});
 
-	l->addWidget(pi);
-	l->addWidget(clear);
-	l->addWidget(is_closed);
-	l->addWidget(show_circles);
-	l->addWidget(show_broken_line);
-	l->addWidget(show_tangent);
-	l->addWidget(show_normal);
-	l->addWidget(anima);
-	l->addWidget(positin);
-	l->addStretch();
-	h->addLayout(l);
-	h->addWidget(canvas, 1);
-	positin->setMaximum(100);
-
-	QObject::connect(pi, &QPushButton::pressed, canvas, &QCanvasWidget::setPi);
-	QObject::connect(clear, &QPushButton::pressed, canvas, &QCanvasWidget::clear);
-	QObject::connect(is_closed, &QCheckBox::toggled, canvas, &QCanvasWidget::setIsClose);
-	QObject::connect(show_circles, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowCircles);
-	QObject::connect(show_broken_line, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowBrokenLine);
-	QObject::connect(show_tangent, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowTangent);
-	QObject::connect(show_normal, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowNormal);
-
-	QObject::connect(anima, &QCheckBox::toggled, [&timer](bool value)
+	
+	auto show_broken_line = std::make_unique<Wt::WCheckBox>("Zigzag lines");
+	show_broken_line->changed().connect([show_broken_line = show_broken_line.get(), painting = painting.get()]
 		{
-			if (value)
-				timer.start();
+			painting->setShowBrokenLine(show_broken_line->isChecked());
+		});
+
+	auto show_tangent = std::make_unique<Wt::WCheckBox>("Tangent");
+	show_tangent->changed().connect([show_tangent = show_tangent.get(), painting = painting.get()]
+		{
+			painting->setShowTangent(show_tangent->isChecked());
+		});
+
+
+	auto show_normal = std::make_unique<Wt::WCheckBox>("Normal");
+	show_normal->changed().connect([show_normal = show_normal.get(), painting = painting.get()]
+		{
+			painting->setShowNormal(show_normal->isChecked());
+		});
+
+	auto *timer = app->root()->addChild(std::make_unique<Wt::WTimer>());
+	timer->setInterval(std::chrono::milliseconds(100));
+	auto anima = std::make_unique<Wt::WCheckBox>("Animation");
+	anima->changed().connect([anima = anima.get(), timer]
+		{
+			if (anima->isChecked())
+				timer->start();
 			else
-				timer.stop();
-		}
-	);
+				timer->stop();
+		});
 
-	QObject::connect(positin, &QDial::valueChanged, [canvas, positin](int value)
+	auto sb = std::make_unique<Wt::WSpinBox>();
+	sb->setRange(0, 360);
+	sb->setValue(0);
+
+	auto slider = std::make_unique<Wt::WSlider>();
+	slider->setTickPosition(Wt::WSlider::TickPosition::TicksBelow);
+	slider->setTickInterval(60);
+	slider->setRange(0, 360);
+
+	sb->valueChanged().connect(
+		[slider = slider.get(), painting = painting.get(), sb = sb.get()]
 		{
-			canvas->setPos(2 * fourtd::pi * value / positin->maximum());
-		}
-	);
+			slider->setValue(sb->value());
+			painting->setPosC(sb->value());
+		});
 
-	win.setLayout(h);
+	slider->valueChanged().connect(
+		[slider = slider.get(), painting = painting.get(), sb = sb.get()]
+		{
+			sb->setValue(slider->value());
+			painting->setPosC(slider->value());
+		});
+	
+	timer->timeout().connect([slider = slider.get(), painting = painting.get(), sb = sb.get()]
+		{
+			slider->setValue((slider->value() + 1) % 360 );
+			sb->setValue(slider->value());
+			painting->setPosC(slider->value());
+		});
+	
 
-	win.resize(QSize(800, 600));
-	win.show();
-	return app.exec();
+	auto vbox = std::make_unique<Wt::WVBoxLayout>();
+
+	auto *hbox = container->setLayout(std::make_unique<Wt::WHBoxLayout>());
+	
+	vbox->addWidget(std::move(clear));
+	vbox->addWidget(std::move(pi));
+	vbox->addWidget(std::move(is_closed));
+	vbox->addWidget(std::move(show_circles));
+	vbox->addWidget(std::move(show_broken_line));
+	vbox->addWidget(std::move(show_tangent));
+	vbox->addWidget(std::move(show_normal));
+	vbox->addWidget(std::move(anima));
+	vbox->addWidget(std::move(slider));
+	vbox->addWidget(std::make_unique<Wt::WBreak>());
+	vbox->addWidget(std::move(sb));
+	vbox->addStretch(1);
+
+	hbox->addLayout(std::move(vbox));
+	hbox->addWidget(std::move(painting), 1);
+
+	app->root()->addWidget(std::move(container));
+	return app;
+}
+
+int main(int argc, char** argv)
+{
+	return WRun(argc, argv, &createApplication);
 }
