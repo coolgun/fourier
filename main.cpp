@@ -1,7 +1,17 @@
 #include <stdlib.h>
-#include <QtGui>
-#include <QtWidgets>
-#include <blend2d.h>
+#include <nanogui/formhelper.h>
+#include <nanogui/opengl.h>
+#include <nanogui/glutil.h>
+#include <nanogui/screen.h>
+#include <nanogui/window.h>
+#include <nanogui/layout.h>
+#include <nanogui/label.h>
+#include <nanogui/checkbox.h>
+#include <nanogui/button.h>
+#include <nanogui/colorwheel.h>
+#include "AngleEditor.h"
+#include <iostream>
+#include <string>
 
 #include "trinterp.hpp"
 
@@ -9,12 +19,12 @@ using namespace std::complex_literals;
 
 namespace fourtd
 {
-	template<> inline complex_double fourier::make_complex<const BLPoint&> [[nodiscard]] (const BLPoint& c)
+	template<> inline complex_double fourier::make_complex<const Eigen::Vector2d&> [[nodiscard]](const Eigen::Vector2d &c)
 	{
-		return { c.x,c.y };
+		return { c.x(),c.y() };
 	}
 
-	template<> inline BLPoint fourier::make_value<BLPoint> [[nodiscard]] (const complex_double& z)
+	template<> inline Eigen::Vector2d fourier::make_value<Eigen::Vector2d> [[nodiscard]] (const complex_double& z)
 	{
 		return { z.real(), z.imag() };
 	}
@@ -24,7 +34,7 @@ using namespace fourtd;
 
 namespace
 {
-	inline const QList<BLPoint> pi_symbol =
+	inline const std::deque<Eigen::Vector2d> pi_symbol =
 	{
 		{408.0,130.0}
 		,{503.0,132.0}
@@ -54,18 +64,33 @@ namespace
 		,{188.0,131.0}
 		,{243.0,131.0}
 	};
-	constexpr double sel_tolerance = 7.0 * 7.0;
+	constexpr double sel_tolerance = 7.0;
+
+	nanogui::Vector2i  PiBoundBox()
+	{
+		return std::accumulate(
+			pi_symbol.cbegin(),
+			pi_symbol.cend(),
+			nanogui::Vector2i(0, 0),
+			[](const nanogui::Vector2i& mm, const Eigen::Vector2d& p)->nanogui::Vector2i
+			{
+				return { std::max(mm.x(), static_cast<int>(p.x())), std::max(mm.y(), static_cast<int>(p.y()))};
+			}
+		);
+	}
 }
 
-class QCanvasWidget : public QWidget
+
+class CanvasWidget : public nanogui::Widget
 {
 public:
 
-	QCanvasWidget() :
+
+	CanvasWidget(nanogui::Widget* parent) :
+		nanogui::Widget(parent),
 		f(pts.cbegin(), pts.cend())
 	{
-
-		createInfo.threadCount = std::thread::hardware_concurrency();
+		updateCoeff();
 	}
 
 	void clear()
@@ -73,7 +98,6 @@ public:
 		pts.clear();
 		cur_point = pts.end();
 		updateCoeff();
-		updateCanvas();
 	}
 
 	void setPi()
@@ -81,81 +105,41 @@ public:
 		pts = pi_symbol;
 		cur_point = pts.begin();
 		updateCoeff();
-		updateCanvas();
 	}
 
 	void setPos(double value)
 	{
 		pos = value / (2 * fourtd::pi) * pts.size();
-		updateCanvas(true);
 	}
 
 	void setShowCircles(bool value)
 	{
 		show_circles = value;
-		updateCanvas();
 	}
 
 	void setShowBrokenLine(bool value)
 	{
 		show_broken_line = value;
-		updateCanvas();
 	}
 
 	void setShowTangent(bool value)
 	{
 		show_tangent = value;
-		updateCanvas();
 	}
 
 	void setShowNormal(bool value)
 	{
 		show_normal = value;
-		updateCanvas();
 	}
-
 
 	void setIsClose(bool value)
 	{
 		interp.clear();
 		is_close = value;
-		updateCanvas();
 	}
 
 private:
-	void renderCanvas()
-	{
-		BLContext ctx(blImage, createInfo);
-		onRenderB2D(ctx);
-		ctx.end();
-	}
-
-	void updateCanvas(bool force = false)
-	{
-		if (force)
-			renderCanvas();
-		else
-			dirty = true;
-		repaint();
-	}
-
-	void resizeCanvas()
-	{
-		const auto sz = size();
-		if (substr.size() == sz)
-			return;
-		substr = QImage(sz, QImage::Format_ARGB32_Premultiplied);
-		blImage.createFromData(substr.width(), substr.height(), BL_FORMAT_PRGB32, substr.bits(), substr.bytesPerLine());
-		updateCanvas(false);
-	}
-
-	bool dirty = {};
-
-	void resizeEvent(QResizeEvent*) override
-	{
-		resizeCanvas();
-	}
-
+	
 	void updateCoeff()
 	{
 		interp.clear();
@@ -183,36 +167,36 @@ private:
 			}
 		);
 
-		if (parentWidget())
+		if (parent())
 		{
 			auto square = std::async(std::launch::async, [this] { return f.square(); });
 			auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
-			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(square.get()).arg(length.get()));
+			static_cast<nanogui::Window*>(parent())->setTitle(
+				std::string("fourier - S = ") +
+				std::to_string(square.get()) + 
+				std::string(" , Len = ") +
+				std::to_string(length.get()));
 		}
 
 		radii = std::move(rad_future.get());
 	}
 
-	void paintEvent(QPaintEvent*) override
+	void draw(NVGcontext* ctx) override
 	{
-		QPainter painter(this);
-		if (dirty)
-			renderCanvas();
-		painter.drawImage(QPoint{ 0, 0 }, substr);
+		onRenderB2D(ctx);
 	}
 
-	auto find_point(const BLPoint& test_pt)
+	auto find_point(const Eigen::Vector2d& test_pt)
 	{
 		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
 			[&test_pt](auto& pt)
 			{
-				const auto d = pt - test_pt;
-				return (d.x * d.x + d.y * d.y) < sel_tolerance;
+				return std::hypot(pt.x() - test_pt.x(), pt.y() - test_pt.y()) < sel_tolerance;
 			}
 		);
 	}
 
-	void mouseDoubleClickEvent(QMouseEvent* event) override
+	/*void mouseDoubleClickEvent(QMouseEvent* event) override
 	{
 		const auto test = find_point(BLPoint(event->pos().x(), event->pos().y()));
 
@@ -223,19 +207,28 @@ private:
 			updateCoeff();
 			updateCanvas();
 		}
-	}
+	}*/
 
-	void mousePressEvent(QMouseEvent* event) override
+	bool mouseButtonEvent(const Eigen::Vector2i& p, int button, bool down, int modifiers) override
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
+		Widget::mouseButtonEvent(p, button, down, modifiers);
+		
+		if (!down)
+		{
+			cur_point = pts.end();
+			return false;
+		}
+		
+		const Eigen::Vector2d pt(p.x(), p.y());
+
 		cur_point = find_point(pt);
 		if (cur_point == pts.end())
 		{
-			const auto inter = f.lengthToPoint({ pt.x,pt.y });
+			const auto inter = f.lengthToPoint({pt.x(), pt.y()});
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
-				pts.insert(index, pt);
+				pts.insert(pts.begin() + index, pt);
 				cur_point = std::next(pts.begin(), index);
 			}
 			else
@@ -245,62 +238,49 @@ private:
 			}
 		}
 		updateCoeff();
-		updateCanvas();
+		return true;
 	}
 
-	void mouseReleaseEvent(QMouseEvent*) override
+	
+	bool mouseMotionEvent(const Eigen::Vector2i& p, const Eigen::Vector2i& rel, int button, int modifiers)  override
 	{
-		cur_point = pts.end();
-	}
 
-	void mouseMoveEvent(QMouseEvent* event) override
-	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
 		if (cur_point != pts.end())
 		{
+			const Eigen::Vector2d pt(p.x(), p.y());
 			*cur_point = pt;
 			updateCoeff();
-			updateCanvas();
+			return true;
 		}
+		return false;
 	}
 
-	void showEvent(QShowEvent* event) override
+	nanogui::Vector2i preferredSize(NVGcontext* ctx) const override
 	{
-		updateCoeff();
-		QWidget::showEvent(event);
+		return PiBoundBox();
 	}
 
-
-	void onRenderB2D(BLContext& ctx)
+	void onRenderB2D(NVGcontext* ctx)
 	{
-
-		ctx.setFillStyle(BLRgba32(0xFF000000u));
-		ctx.fillAll();
-
+		Widget::draw(ctx);
+		
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
-				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
+				f.values<Eigen::Vector2d>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
 
-			ctx.setStrokeStyle(BLRgba32(0xFFFFFF00u));
-
-			ctx.setStrokeWidth(4);
-			if (is_close)
-				ctx.strokePolygon(&interp[0], interp.size());
-			else
-				ctx.strokePolyline(&interp[0], interp.size());
-
+			nvgStrokeWidth(ctx, 4);
+			nvgStrokeColor(ctx, nvgRGB(0xFF, 0xFF, 0x00));
+			nvgPolygone(ctx, interp, is_close);
+			
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
-				std::vector<BLPoint> lines;
-				BLPath big_path;
-				BLPath small_path;
+				std::vector<Eigen::Vector2d> lines;
 				complex_double der;
-
 				std::list<complex_double> vector_list;
 
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
-					[&big_path, &small_path, &lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
+					[&lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
 				{
 
 					if (lines.empty())
@@ -318,147 +298,189 @@ private:
 					++r_it;
 				}
 				);
-
+				nvgBeginPath(ctx);
 				complex_double sum= f.firstCoeff();
 				for (const auto &vec : vector_list)
 				{
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(vec)));
+					if(show_circles)
+						nvgCircle(ctx, sum.real(), sum.imag(), std::abs(vec));
 					sum += vec;
 					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
 				}
 
 				if (show_circles)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0xF000B3B3u));
-					ctx.strokePath(big_path);
+					nvgStrokeWidth(ctx, 2);
+					nvgStrokeColor(ctx, nvgRGBA(0x00, 0xB3, 0xB3, 0xF0));
+					nvgStroke(ctx);
 				}
 
-				ctx.setStrokeWidth(1);
+				nvgStrokeWidth(ctx, 1);
 
 				if (show_broken_line)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0xFFFFFFFFu));
-					ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-					ctx.strokePolyline(&lines[0], lines.size());
-					ctx.fillPath(small_path);
+					nvgStrokeWidth(ctx, 2);
+					nvgLineJoin(ctx, NVG_ROUND);
+					nvgStrokeColor(ctx, nvgRGB(0xFF, 0xFF, 0xFF));
+					nvgPolygone(ctx, lines, false);
+					nvgBeginPath(ctx);
+					for (const auto& centre : lines)
+					{
+						nvgCircle(ctx, centre.x(), centre.y(), 2);
+					}
+					nvgFillColor(ctx, nvgRGB(0xFF, 0xFF, 0xFF));
+					nvgFill(ctx);
 				}
 
-				ctx.setStrokeWidth(1);
-				ctx.setStrokeStyle(BLRgba32(0xFFFF0000u));
+				nvgStrokeWidth(ctx, 1);
+				nvgStrokeColor(ctx, nvgRGB(0xFF, 0x00, 0x00));
 
 				if (show_tangent)
-					ctx.strokeLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
-
+				{
+					nvgBeginPath(ctx);
+					nvgMoveTo(ctx, cur_pt.real() - der.real(), cur_pt.imag() - der.imag());
+					nvgLineTo(ctx, cur_pt.real() + der.real(), cur_pt.imag() + der.imag());
+					nvgStroke(ctx);
+				}
 				if (show_normal)
-					ctx.strokeLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
-				ctx.setStrokeWidth(3);
-				ctx.strokeCircle(lines.back().x, lines.back().y, 4);
+				{
+					nvgBeginPath(ctx);
+					nvgMoveTo(ctx, cur_pt.real() - der.imag(), cur_pt.imag() + der.real());
+					nvgLineTo(ctx, cur_pt.real() + der.imag(), cur_pt.imag() - der.real());
+					nvgStroke(ctx);
+				}
+
+				nvgStrokeWidth(ctx, 3);
+				nvgBeginPath(ctx);
+				nvgCircle(ctx, lines.back().x(), lines.back().y(), 4);
+				nvgStroke(ctx);
+
 			}
 		}
 
-		BLPath path;
+		nvgBeginPath(ctx);
 
 		for (const auto& pt : pts)
 		{
-			path.addCircle(BLCircle(pt.x, pt.y, 3));
+			nvgCircle(ctx,pt.x(), pt.y(), 3);
 		}
-		ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-		ctx.fillPath(path);
+
+		nvgFillColor(ctx, nanogui::Color(255, 255, 255, 255));
+		nvgFill(ctx);
 	}
 
 
 private:
-	BLImage blImage;
-	QImage substr;
-	QList<BLPoint> pts = pi_symbol;
+	std::deque<Eigen::Vector2d> pts = pi_symbol;
 	fourier f;
-	QList<BLPoint>::iterator cur_point = pts.end();
-	std::vector<BLPoint> interp;
+	std::deque<Eigen::Vector2d>::iterator cur_point = pts.end();
+	std::vector<Eigen::Vector2d> interp;
 	std::vector<std::pair<complex_double, complex_double>> radii;
 	bool is_close = true;
 	bool show_circles{};
 	bool show_broken_line{};
 	bool show_tangent{};
 	bool show_normal{};
-	BLContextCreateInfo createInfo{};
 	double pos{};
+};
+
+
+class FourierApplication : public nanogui::Screen
+{
+	public:
+		FourierApplication():
+			nanogui::Screen(nanogui::Vector2i(800, 600), "fourier"),
+			m_animation(false),
+			m_delay(50)
+		{
+			auto* screen = this;
+			auto* window = new nanogui::Window(screen, "fourier");
+			window->setSize({ 800, 600 });
+			window->setPosition({ 0,0 });
+			auto* layout = new nanogui::GridLayout(nanogui::Orientation::Horizontal);
+			layout->setColAlignment({ nanogui::Alignment::Minimum, nanogui::Alignment::Fill });
+			layout->setRowAlignment({ nanogui::Alignment::Fill});
+			window->setLayout(layout);
+			auto* tool_widget = new nanogui::Widget(window);
+			auto* v = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill);
+			tool_widget->setLayout(v);
+
+			auto* canvas = new CanvasWidget(window);
+
+			auto* set_pi = new nanogui::Button(tool_widget, "Pi");
+			set_pi->setCallback([canvas]() { canvas->setPi(); });
+
+			auto* clear = new nanogui::Button(tool_widget, "Clear");
+			clear->setCallback([canvas]() { canvas->clear(); });
+
+			auto* is_closed = new nanogui::CheckBox(tool_widget, "Closed");
+			is_closed->setChecked(true);
+			is_closed->setCallback([canvas](bool value) { canvas->setIsClose(value); });
+
+			auto* show_circles = new nanogui::CheckBox(tool_widget, "Circles");
+			show_circles->setCallback([canvas](bool value) { canvas->setShowCircles(value); });
+
+			auto* show_broken_line = new nanogui::CheckBox(tool_widget, "Zigzag lines");
+			show_broken_line->setCallback([canvas](bool value) { canvas->setShowBrokenLine(value); });
+
+			auto* show_tangent = new nanogui::CheckBox(tool_widget, "Tangent");
+			show_tangent->setCallback([canvas](bool value) { canvas->setShowTangent(value); });
+
+			auto* show_normal = new nanogui::CheckBox(tool_widget, "Normal");
+			show_normal->setCallback([canvas](bool value) { canvas->setShowNormal(value); });
+
+			auto* anima = new nanogui::CheckBox(tool_widget, "Animation");
+			anima->setCallback([this](bool value) { setAnimation(value); });
+
+			angle = new  nanogui::AngleEditor(tool_widget);
+			angle->setCallback([canvas](int value) { canvas->setPos(2 * fourtd::pi * value / 360.0); });
+
+			//canvas->setSize({ 400, 300 });
+			screen->setVisible(true);
+			screen->performLayout();
+		}
+
+		void draw(NVGcontext* ctx) override
+		{
+			if (m_animation)
+			{
+				const auto t_now = std::chrono::high_resolution_clock::now();
+				const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t_now - t_start);
+				if (m_delay <= elapsed)
+				{
+					angle->setAngle(angle->angle() + 1.0);
+					t_start = t_now;
+				}
+			}
+			Screen::draw(ctx);
+		}
+
+		void setAnimation(bool anim)
+		{
+			if (anim == m_animation) return;
+			m_animation = anim;
+			if (m_animation)
+			{
+				t_start = std::chrono::high_resolution_clock::now();
+			}
+
+		}
+ 
+	private:
+		nanogui::AngleEditor* angle;
+		bool m_animation;
+		const std::chrono::milliseconds m_delay;
+		std::chrono::steady_clock::time_point t_start;
+	
+
 };
 
 int main(int argc, char* argv[])
 {
-	std::vector<int>a;
-	QApplication app(argc, argv);
-	QWidget win;
-
-	auto* h = new QHBoxLayout;
-	auto* l = new QVBoxLayout;
-	h->setContentsMargins(1, 1, 1, 1);
-	l->setContentsMargins(1, 1, 1, 1);
-	auto* clear = new QPushButton("Clear");
-	auto* pi = new QPushButton("Pi");
-	auto* is_closed = new QCheckBox("Closed");
-	is_closed->setChecked(true);
-	auto* show_circles = new QCheckBox("Circles");
-	auto* show_broken_line = new QCheckBox("Zigzag lines");
-	auto* show_tangent = new QCheckBox("Tangent");
-	auto* show_normal = new QCheckBox("Normal");
-
-	auto* anima = new QCheckBox("Animation");
-	auto* positin = new QDial();
-	positin->setWrapping(true);
-	auto* canvas = new QCanvasWidget;
-
-	QTimer timer;
-	QObject::connect(&timer, &QTimer::timeout, [positin]
-		{
-			positin->setValue(positin->value() + 1);
-		}
-	);
-	timer.setInterval(100);
-
-	l->addWidget(pi);
-	l->addWidget(clear);
-	l->addWidget(is_closed);
-	l->addWidget(show_circles);
-	l->addWidget(show_broken_line);
-	l->addWidget(show_tangent);
-	l->addWidget(show_normal);
-	l->addWidget(anima);
-	l->addWidget(positin);
-	l->addStretch();
-	h->addLayout(l);
-	h->addWidget(canvas, 1);
-	positin->setMaximum(100);
-
-	QObject::connect(pi, &QPushButton::pressed, canvas, &QCanvasWidget::setPi);
-	QObject::connect(clear, &QPushButton::pressed, canvas, &QCanvasWidget::clear);
-	QObject::connect(is_closed, &QCheckBox::toggled, canvas, &QCanvasWidget::setIsClose);
-	QObject::connect(show_circles, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowCircles);
-	QObject::connect(show_broken_line, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowBrokenLine);
-	QObject::connect(show_tangent, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowTangent);
-	QObject::connect(show_normal, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowNormal);
-
-	QObject::connect(anima, &QCheckBox::toggled, [&timer](bool value)
-		{
-			if (value)
-				timer.start();
-			else
-				timer.stop();
-		}
-	);
-
-	QObject::connect(positin, &QDial::valueChanged, [canvas, positin](int value)
-		{
-			canvas->setPos(2 * fourtd::pi * value / positin->maximum());
-		}
-	);
-
-	win.setLayout(h);
-
-	win.resize(QSize(800, 600));
-	win.show();
-	return app.exec();
+	
+	nanogui::init();
+	nanogui::ref<FourierApplication> app = new FourierApplication;
+	nanogui::mainloop();
+	nanogui::shutdown();
+	return 0;
 }
