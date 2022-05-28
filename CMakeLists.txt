@@ -3,24 +3,14 @@ cmake_policy(SET CMP0063 NEW) # Honor visibility properties.
 
 project(fourier CXX)
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_AUTOMOC TRUE)
 
-set(FOURIER_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE PATH "Location of 'fourier' directory")
-set(BLEND2D_DIR "${FOURIER_DIR}/blend2d" CACHE PATH "Location of 'blend2d'")
-set(ASMJIT_DIR "${FOURIER_DIR}/AsmJit" CACHE PATH "Location of 'asmjit'")
+add_subdirectory(fltk)
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/fltk fltk)
 
-set(BLEND2D_STATIC TRUE)
-include("${BLEND2D_DIR}/CMakeLists.txt")
+add_executable(fourier main.cpp)
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+target_link_libraries(fourier  fltk fltk_gl)
 
-set(SRC_LIST main.cpp)
-add_executable(${PROJECT_NAME} ${SRC_LIST})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-target_link_libraries(${PROJECT_NAME}  blend2d::blend2d)
-target_link_libraries(${PROJECT_NAME}  Qt5::Widgets)
-
-qt5_use_modules(${PROJECT_NAME}  Widgets)
-  

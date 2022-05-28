@@ -1,7 +1,11 @@
 #include <stdlib.h>
-#include <QtGui>
-#include <QtWidgets>
-#include <blend2d.h>
+#include <FL/Fl.H>
+#include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_Button.H>
+#include <FL/fl_draw.H>
+#include <FL/Fl_Check_Button.H>
+#include <FL/Fl_Dial.H>
 
 #include "trinterp.hpp"
 
@@ -9,22 +13,24 @@ using namespace std::complex_literals;
 
 namespace fourtd
 {
-	template<> inline complex_double fourier::make_complex<const BLPoint&> [[nodiscard]] (const BLPoint& c)
+	template<> inline complex_double fourier::make_complex<const complex_double&> [[nodiscard]] (const complex_double& c)
 	{
-		return { c.x,c.y };
+		return c;
 	}
 
-	template<> inline BLPoint fourier::make_value<BLPoint> [[nodiscard]] (const complex_double& z)
+	template<> inline complex_double fourier::make_value<complex_double> [[nodiscard]] (const complex_double& z)
 	{
-		return { z.real(), z.imag() };
+		return z;
 	}
 }
 
 using namespace fourtd;
 
+Fl_Double_Window* win{};
+
 namespace
 {
-	inline const QList<BLPoint> pi_symbol =
+	inline const std::deque<complex_double> pi_symbol =
 	{
 		{408.0,130.0}
 		,{503.0,132.0}
@@ -54,18 +60,21 @@ namespace
 		,{188.0,131.0}
 		,{243.0,131.0}
 	};
-	constexpr double sel_tolerance = 7.0 * 7.0;
+
+	constexpr double sel_tolerance = 7.0;
 }
 
-class QCanvasWidget : public QWidget
+class FLCanvasWidget : public Fl_Widget
 {
+
 public:
 
-	QCanvasWidget() :
+	FLCanvasWidget(int x, int y, int cx, int cy) :
+		Fl_Widget(x, y, cx, cy, ""),
 		f(pts.cbegin(), pts.cend())
 	{
-
-		createInfo.threadCount = std::thread::hardware_concurrency();
+		updateCoeff();
+		color(FL_BLACK);
 	}
 
 	void clear()
@@ -73,7 +82,7 @@ public:
 		pts.clear();
 		cur_point = pts.end();
 		updateCoeff();
-		updateCanvas();
+		redraw();
 	}
 
 	void setPi()
@@ -81,37 +90,37 @@ public:
 		pts = pi_symbol;
 		cur_point = pts.end();
 		updateCoeff();
-		updateCanvas();
+		redraw();
 	}
 
 	void setPos(double value)
 	{
 		pos = value / (2 * fourtd::pi) * pts.size();
-		updateCanvas(true);
+		redraw();
 	}
 
 	void setShowCircles(bool value)
 	{
 		show_circles = value;
-		updateCanvas();
+		redraw();
 	}
 
 	void setShowBrokenLine(bool value)
 	{
 		show_broken_line = value;
-		updateCanvas();
+		redraw();
 	}
 
 	void setShowTangent(bool value)
 	{
 		show_tangent = value;
-		updateCanvas();
+		redraw();
 	}
 
 	void setShowNormal(bool value)
 	{
 		show_normal = value;
-		updateCanvas();
+		redraw();
 	}
 
 
@@ -119,42 +128,10 @@ public:
 	{
 		interp.clear();
 		is_close = value;
-		updateCanvas();
+		redraw();
 	}
 
 private:
-	void renderCanvas()
-	{
-		BLContext ctx(blImage, createInfo);
-		onRenderB2D(ctx);
-		ctx.end();
-	}
-
-	void updateCanvas(bool force = false)
-	{
-		if (force)
-			renderCanvas();
-		else
-			dirty = true;
-		repaint();
-	}
-
-	void resizeCanvas()
-	{
-		const auto sz = size();
-		if (substr.size() == sz)
-			return;
-		substr = QImage(sz, QImage::Format_ARGB32_Premultiplied);
-		blImage.createFromData(substr.width(), substr.height(), BL_FORMAT_PRGB32, substr.bits(), substr.bytesPerLine());
-		updateCanvas(false);
-	}
-
-	bool dirty = {};
-
-	void resizeEvent(QResizeEvent*) override
-	{
-		resizeCanvas();
-	}
 
 	void updateCoeff()
 	{
@@ -182,60 +159,49 @@ private:
 				return rad;
 			}
 		);
-
-		if (parentWidget())
-		{
-			auto square = std::async(std::launch::async, [this] { return f.square(); });
-			auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
-			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(square.get()).arg(length.get()));
-		}
-
+		auto square = std::async(std::launch::async, [this] { return f.square(); });
+		auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
+		const auto title = std::string("fourier - S = ") +
+			std::to_string(square.get()) +
+			std::string(" , Len = ") +
+			std::to_string(length.get());
+		win->label(title.c_str());
 		radii = std::move(rad_future.get());
 	}
 
-	void paintEvent(QPaintEvent*) override
-	{
-		QPainter painter(this);
-		if (dirty)
-			renderCanvas();
-		painter.drawImage(QPoint{ 0, 0 }, substr);
-	}
-
-	auto find_point(const BLPoint& test_pt)
+	auto find_point(const complex_double & test_pt)
 	{
 		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
 			[&test_pt](auto& pt)
 			{
-				const auto d = pt - test_pt;
-				return (d.x * d.x + d.y * d.y) < sel_tolerance;
+				return std::abs(pt - test_pt) < sel_tolerance;
 			}
 		);
 	}
 
-	void mouseDoubleClickEvent(QMouseEvent* event) override
+	void mouseDoubleClickEvent(const complex_double &pos)
 	{
-		const auto test = find_point(BLPoint(event->pos().x(), event->pos().y()));
+		const auto test = find_point(pos);
 
 		if (test != pts.end())
 		{
 			pts.erase(test);
 			cur_point = pts.end();
 			updateCoeff();
-			updateCanvas();
+			redraw();
 		}
 	}
 
-	void mousePressEvent(QMouseEvent* event) override
+	void mousePressEvent(const complex_double& pt)
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
 		cur_point = find_point(pt);
 		if (cur_point == pts.end())
 		{
-			const auto inter = f.lengthToPoint({ pt.x,pt.y });
+			const auto inter = f.lengthToPoint(pt);
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
-				pts.insert(index, pt);
+				pts.insert(pts.begin() + index, pt);
 				cur_point = std::next(pts.begin(), index);
 			}
 			else
@@ -244,63 +210,90 @@ private:
 				cur_point = std::prev(pts.end());
 			}
 		}
+
 		updateCoeff();
-		updateCanvas();
+		redraw();
 	}
 
-	void mouseReleaseEvent(QMouseEvent*) override
+	void mouseReleaseEvent() 
 	{
 		cur_point = pts.end();
 	}
 
-	void mouseMoveEvent(QMouseEvent* event) override
+	void mouseMoveEvent(const complex_double& pt) 
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
 		if (cur_point != pts.end())
 		{
 			*cur_point = pt;
 			updateCoeff();
-			updateCanvas();
+			redraw();
 		}
 	}
 
-	void showEvent(QShowEvent* event) override
+	int handle(int event) override
 	{
-		updateCoeff();
-		QWidget::showEvent(event);
+		int result = Fl_Widget::handle(event);
+		switch (event) 
+		{
+			case FL_PUSH:
+			{
+				result = 0;
+				if(Fl::event_clicks() > 0)
+				{
+					mouseDoubleClickEvent(complex_double(Fl::event_x() - x(), Fl::event_y() - y()));
+					return 1;
+				}
+				mousePressEvent(complex_double(Fl::event_x() - x(), Fl::event_y() - y()));
+			}; 
+			case FL_DRAG:
+			{
+				result = 1;
+				mouseMoveEvent(complex_double(Fl::event_x() - x(), Fl::event_y() - y()));
+			}; break;
+		
+			case FL_RELEASE:
+			{
+				result = 1;
+				mouseReleaseEvent();
+			}; break;
+
+			default:
+				break;
+		}
+		return result;
 	}
 
-
-	void onRenderB2D(BLContext& ctx)
+	void draw() override
 	{
-
-		ctx.setFillStyle(BLRgba32(0xFF000000u));
-		ctx.fillAll();
-
+		fl_rectf(x(), y(), w(), h(), 0);
+		fl_push_clip(x(), y(), w(), h());
+		fl_push_matrix();
+		fl_translate(x(), y());
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
-				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
+				f.values<complex_double>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
 
-			ctx.setStrokeStyle(BLRgba32(0xFFFFFF00u));
-
-			ctx.setStrokeWidth(4);
-			if (is_close)
-				ctx.strokePolygon(&interp[0], interp.size());
-			else
-				ctx.strokePolyline(&interp[0], interp.size());
+			fl_color(250,255,0);
+			fl_line_style(FL_SOLID, 4);
+			
+			is_close ? fl_begin_loop() : fl_begin_line();
+			for (const auto& pt : interp)
+			{
+				fl_vertex(pt.real(), pt.imag());
+			}
+			is_close ? fl_end_line() : fl_end_line();
 
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
-				std::vector<BLPoint> lines;
-				BLPath big_path;
-				BLPath small_path;
+				std::vector<complex_double> lines;
+				std::vector<std::pair<complex_double, double>> big_path;
 				complex_double der;
 
 				std::list<complex_double> vector_list;
 
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
-					[&big_path, &small_path, &lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
+					[&lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
 				{
 
 					if (lines.empty())
@@ -322,142 +315,175 @@ private:
 				complex_double sum= f.firstCoeff();
 				for (const auto &vec : vector_list)
 				{
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(vec)));
+					big_path.emplace_back(sum, std::abs(vec));
 					sum += vec;
 					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
 				}
 
 				if (show_circles)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0xF000B3B3u));
-					ctx.strokePath(big_path);
+					fl_line_style(FL_SOLID, 2);
+					fl_color(0x00, 0xB3, 0xB3);
+					for (const auto &circle: big_path)
+					{
+						fl_begin_loop();
+						fl_circle(circle.first.real(), circle.first.imag(), circle.second);
+						fl_end_loop();
+					}
 				}
-
-				ctx.setStrokeWidth(1);
-
+			
 				if (show_broken_line)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0xFFFFFFFFu));
-					ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-					ctx.strokePolyline(&lines[0], lines.size());
-					ctx.fillPath(small_path);
+					fl_line_style(FL_SOLID, 2);
+					fl_color(255, 255, 255);
+
+					fl_begin_line();
+					for (const auto& pt : lines)
+					{
+						fl_vertex(pt.real(), pt.imag());
+					}
+					fl_end_line();
+
+					fl_begin_polygon();
+
+					for (const auto& pt : lines)
+					{
+						fl_circle(std::round(pt.real()), std::round(pt.imag()), 2);
+					}
+
+					fl_end_polygon();
 				}
 
-				ctx.setStrokeWidth(1);
-				ctx.setStrokeStyle(BLRgba32(0xFFFF0000u));
+				fl_color(255,0,0 );
+				fl_line_style(FL_SOLID, 1);
 
 				if (show_tangent)
-					ctx.strokeLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
+					fl_line(
+						cur_pt.real() - der.real() + x(),
+						cur_pt.imag() - der.imag() + y(),
+						cur_pt.real() + der.real() + x(),
+						cur_pt.imag() + der.imag() + y());
 
 				if (show_normal)
-					ctx.strokeLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
-				ctx.setStrokeWidth(3);
-				ctx.strokeCircle(lines.back().x, lines.back().y, 4);
+					fl_line(
+						cur_pt.real() - der.imag() + x(),
+						cur_pt.imag() + der.real() + y(),
+						cur_pt.real() + der.imag() + x(),
+						cur_pt.imag() - der.real() + y());
+				
+				fl_line_style(FL_SOLID, 3);
+				fl_begin_loop();
+				fl_circle(lines.back().real(), lines.back().imag(), 4);
+				fl_end_loop();
 			}
 		}
 
-		BLPath path;
-
+		fl_color(FL_WHITE);
+		fl_begin_polygon();
+		
 		for (const auto& pt : pts)
 		{
-			path.addCircle(BLCircle(pt.x, pt.y, 3));
+			fl_circle(std::round(pt.real()), std::round(pt.imag()), 4);
 		}
-		ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-		ctx.fillPath(path);
+
+		fl_end_polygon();
+		fl_pop_matrix();
+		fl_pop_clip();
 	}
 
 
 private:
-	BLImage blImage;
-	QImage substr;
-	QList<BLPoint> pts = pi_symbol;
+	std::deque<complex_double> pts = pi_symbol;
 	fourier f;
-	QList<BLPoint>::iterator cur_point = pts.end();
-	std::vector<BLPoint> interp;
+	std::deque<complex_double>::iterator cur_point = pts.end();
+	std::vector<complex_double> interp;
 	std::vector<std::pair<complex_double, complex_double>> radii;
 	bool is_close = true;
 	bool show_circles{};
 	bool show_broken_line{};
 	bool show_tangent{};
 	bool show_normal{};
-	BLContextCreateInfo createInfo{};
 	double pos{};
 };
 
+static constexpr double delta = 1/100.0;
+
+FLCanvasWidget* canvas{};
+Fl_Dial* positin{};
+
+void setPos(Fl_Widget* w, void* u)
+{
+	auto* positin = static_cast<Fl_Dial*>(w);
+	canvas->setPos(2 * fourtd::pi * positin->value() / 360);
+}
+
+static void tick(void* v)
+{
+	//positin->value(positin->value() > 1 ? 0: positin->value(positin->value() + positin->step()));
+	positin->value(positin->value() + 1);
+	setPos(positin, nullptr);
+	Fl::repeat_timeout(delta, tick, v);
+}
+
+
 int main(int argc, char* argv[])
 {
-	QApplication app(argc, argv);
-	QWidget win;
+	static const int form_w = 800;
+	static const int form_h = 600;
+	static const int tool_panel_width = 100;
+	
+	win = new Fl_Double_Window(form_w, form_h, "fourier");
+	win->begin();
+		Fl_Group* h = new Fl_Group(0, 0, form_w, form_h);
+		h->begin();
+			Fl_Group* v = new Fl_Group(0, 0, tool_panel_width, form_h);
+			v->begin();
+				auto* clear = new Fl_Button(0, 0, tool_panel_width, 20, "Clear");
+				clear->callback([](Fl_Widget* w, void* u) {canvas->clear();});
 
-	auto* h = new QHBoxLayout;
-	auto* l = new QVBoxLayout;
-	h->setContentsMargins(1, 1, 1, 1);
-	l->setContentsMargins(1, 1, 1, 1);
-	auto* clear = new QPushButton("Clear");
-	auto* pi = new QPushButton("Pi");
-	auto* is_closed = new QCheckBox("Closed");
-	is_closed->setChecked(true);
-	auto* show_circles = new QCheckBox("Circles");
-	auto* show_broken_line = new QCheckBox("Zigzag lines");
-	auto* show_tangent = new QCheckBox("Tangent");
-	auto* show_normal = new QCheckBox("Normal");
+				auto* pi = new Fl_Button(0, 20, tool_panel_width, 20, ("Pi"));
+				pi->callback([](Fl_Widget* w, void* u) {canvas->setPi();});
 
-	auto* anima = new QCheckBox("Animation");
-	auto* positin = new QDial();
-	positin->setWrapping(true);
-	auto* canvas = new QCanvasWidget;
+				auto* is_closed = new Fl_Check_Button(0, 40, tool_panel_width, 20, ("Closed"));
+				is_closed->value(true);
+				is_closed->callback([](Fl_Widget* w, void* u) {canvas->setIsClose(static_cast<Fl_Check_Button*>(w)->value());});
 
-	QTimer timer;
-	QObject::connect(&timer, &QTimer::timeout, [positin]
-		{
-			positin->setValue(positin->value() + 1);
-		}
-	);
-	timer.setInterval(100);
+				auto* show_circles = new Fl_Check_Button(0, 60, tool_panel_width, 20, ("Circles"));
+				show_circles->callback([](Fl_Widget* w, void* u) {canvas->setShowCircles(static_cast<Fl_Check_Button*>(w)->value());});
 
-	l->addWidget(pi);
-	l->addWidget(clear);
-	l->addWidget(is_closed);
-	l->addWidget(show_circles);
-	l->addWidget(show_broken_line);
-	l->addWidget(show_tangent);
-	l->addWidget(show_normal);
-	l->addWidget(anima);
-	l->addWidget(positin);
-	l->addStretch();
-	h->addLayout(l);
-	h->addWidget(canvas, 1);
-	positin->setMaximum(100);
+				auto* show_broken_line = new Fl_Check_Button(0, 80, tool_panel_width, 20, ("Zigzag lines"));
+				show_broken_line->callback([](Fl_Widget* w, void* u) {canvas->setShowBrokenLine(static_cast<Fl_Check_Button*>(w)->value());});
 
-	QObject::connect(pi, &QPushButton::pressed, canvas, &QCanvasWidget::setPi);
-	QObject::connect(clear, &QPushButton::pressed, canvas, &QCanvasWidget::clear);
-	QObject::connect(is_closed, &QCheckBox::toggled, canvas, &QCanvasWidget::setIsClose);
-	QObject::connect(show_circles, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowCircles);
-	QObject::connect(show_broken_line, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowBrokenLine);
-	QObject::connect(show_tangent, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowTangent);
-	QObject::connect(show_normal, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowNormal);
+				auto* show_tangent = new Fl_Check_Button(0, 100, tool_panel_width, 20, ("Tangent"));
+				show_tangent->callback([](Fl_Widget* w, void* u) {canvas->setShowTangent(static_cast<Fl_Check_Button*>(w)->value());});
 
-	QObject::connect(anima, &QCheckBox::toggled, [&timer](bool value)
-		{
-			if (value)
-				timer.start();
-			else
-				timer.stop();
-		}
-	);
+				auto* show_normal = new Fl_Check_Button(0, 120, tool_panel_width, 20, ("Normal"));
+				show_normal->callback([](Fl_Widget* w, void* u) {canvas->setShowNormal(static_cast<Fl_Check_Button*>(w)->value());});
 
-	QObject::connect(positin, &QDial::valueChanged, [canvas, positin](int value)
-		{
-			canvas->setPos(2 * fourtd::pi * value / positin->maximum());
-		}
-	);
-
-	win.setLayout(h);
-
-	win.resize(QSize(800, 600));
-	win.show();
-	return app.exec();
+				auto* anima = new Fl_Check_Button(0, 140, tool_panel_width, 20, ("Animation"));
+				anima->callback([](Fl_Widget* w, void* u) 
+					{
+						const auto anim = static_cast<Fl_Check_Button*>(w)->value();
+						Fl::remove_timeout(tick, nullptr);
+						if (anim)
+						{
+							Fl::add_timeout(delta, tick, 0);
+						}
+					});
+				positin = new Fl_Dial(0, 160, tool_panel_width/2, tool_panel_width/2, ("Angle"));
+				positin->angles(0, 360);
+				positin->range(0, 360);
+				positin->callback(setPos);
+				auto *spacer = new Fl_Box(0, 160 + tool_panel_width / 2, tool_panel_width, tool_panel_width - 160 - tool_panel_width / 2);   // "invisible" box "R"
+				spacer->hide();                       
+				v->resizable(spacer);
+			v->end();
+		
+			canvas = new FLCanvasWidget(tool_panel_width,0, form_w - tool_panel_width, form_h);
+			h->resizable(canvas);
+		h->end();
+	win->resizable(h);
+	win->end();
+	win->show(argc, argv);
+	return Fl::run();
 }
