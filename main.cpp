@@ -1,6 +1,15 @@
 #include <stdlib.h>
-#include <QtGui>
-#include <QtWidgets>
+#include <nana/gui.hpp>
+#include <nana/gui/widgets/button.hpp>
+#include <nana/gui/widgets/label.hpp>
+#include <nana/gui/widgets/checkbox.hpp>
+#include <nana/gui/widgets/panel.hpp>
+#include <nana/gui/widgets/slider.hpp>
+#include <nana/gui/drawing.hpp>
+#include <nana/gui/place.hpp>
+#include <nana/gui/timer.hpp>
+
+#include <nana/paint/pixel_buffer.hpp>
 #include <blend2d.h>
 
 #include "trinterp.hpp"
@@ -24,7 +33,7 @@ using namespace fourtd;
 
 namespace
 {
-	inline const QList<BLPoint> pi_symbol =
+	inline const std::deque<BLPoint> pi_symbol =
 	{
 		{408.0,130.0}
 		,{503.0,132.0}
@@ -57,15 +66,54 @@ namespace
 	constexpr double sel_tolerance = 7.0 * 7.0;
 }
 
-class QCanvasWidget : public QWidget
+class CanvasPanel : public nana::panel<true>
 {
+
 public:
 
-	QCanvasWidget() :
-		f(pts.cbegin(), pts.cend())
+	CanvasPanel(nana::form& parent_form) :
+		nana::panel<true>(parent_form),
+		parent_form(parent_form),
+		f(pts.cbegin(), pts.cend()),
+		drawer(*this),
+		substr(size().width, size().height)
 	{
-
 		createInfo.threadCount = std::thread::hardware_concurrency();
+		updateCoeff();
+		events().mouse_move([this](const nana::arg_mouse& am)
+			{
+				mouseMoveEvent(am.pos);
+			}
+		);
+		
+		events().mouse_down([this](const nana::arg_mouse& am)
+			{
+				mousePressEvent(am.pos);
+			}
+		);
+
+		events().mouse_up([this](const nana::arg_mouse&)
+			{
+				mouseReleaseEvent();
+			}
+		);
+
+		events().dbl_click([this](const nana::arg_mouse& am)
+			{
+				mouseDoubleClickEvent(am.pos);
+			}
+		);
+
+		events().resized([this](const nana::arg_resized &ar)
+			{
+				resizeCanvas({ar.width, ar.height});
+			});
+		drawer.draw([this](nana::paint::graphics& graph)
+			{
+				if (dirty)
+					renderCanvas();
+				substr.paste(graph.handle(), {0, 0});
+			});
 	}
 
 	void clear()
@@ -79,7 +127,7 @@ public:
 	void setPi()
 	{
 		pts = pi_symbol;
-		cur_point = pts.begin();
+		cur_point = pts.end();
 		updateCoeff();
 		updateCanvas();
 	}
@@ -136,25 +184,23 @@ private:
 			renderCanvas();
 		else
 			dirty = true;
-		repaint();
+		drawer.update();
 	}
 
-	void resizeCanvas()
+	void resizeCanvas(const nana::size &sz)
 	{
-		const auto sz = size();
-		if (substr.size() == sz)
-			return;
-		substr = QImage(sz, QImage::Format_ARGB32_Premultiplied);
-		blImage.createFromData(substr.width(), substr.height(), BL_FORMAT_PRGB32, substr.bits(), substr.bytesPerLine());
+		substr.open(sz.width, sz.height);
+		blImage.createFromData(
+			sz.width,
+			sz.height,
+			BL_FORMAT_PRGB32,
+			static_cast<void*>(substr.raw_ptr(0)),
+			substr.bytes_per_line());
 		updateCanvas(false);
 	}
 
 	bool dirty = {};
 
-	void resizeEvent(QResizeEvent*) override
-	{
-		resizeCanvas();
-	}
 
 	void updateCoeff()
 	{
@@ -183,24 +229,17 @@ private:
 			}
 		);
 
-		if (parentWidget())
-		{
-			auto square = std::async(std::launch::async, [this] { return f.square(); });
-			auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
-			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(square.get()).arg(length.get()));
-		}
-
+		auto square = std::async(std::launch::async, [this] { return f.square(); });
+		auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
+		parent_form.caption(
+			std::string("fourier - S = ") +
+			std::to_string(square.get()) +
+			std::string(" , Len = ") +
+			std::to_string(length.get()));
 		radii = std::move(rad_future.get());
 	}
 
-	void paintEvent(QPaintEvent*) override
-	{
-		QPainter painter(this);
-		if (dirty)
-			renderCanvas();
-		painter.drawImage(QPoint{ 0, 0 }, substr);
-	}
-
+	
 	auto find_point(const BLPoint& test_pt)
 	{
 		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
@@ -212,9 +251,9 @@ private:
 		);
 	}
 
-	void mouseDoubleClickEvent(QMouseEvent* event) override
+	void mouseDoubleClickEvent(const nana::point& pos)
 	{
-		const auto test = find_point(BLPoint(event->pos().x(), event->pos().y()));
+		const auto test = find_point(BLPoint(pos.x, pos.y));
 
 		if (test != pts.end())
 		{
@@ -225,9 +264,9 @@ private:
 		}
 	}
 
-	void mousePressEvent(QMouseEvent* event) override
+	void mousePressEvent(const nana::point &pos)
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
+		const BLPoint pt(pos.x, pos.y);
 		cur_point = find_point(pt);
 		if (cur_point == pts.end())
 		{
@@ -235,7 +274,7 @@ private:
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
-				pts.insert(index, pt);
+				pts.insert(pts.begin() + index, pt);
 				cur_point = std::next(pts.begin(), index);
 			}
 			else
@@ -248,14 +287,14 @@ private:
 		updateCanvas();
 	}
 
-	void mouseReleaseEvent(QMouseEvent*) override
+	void mouseReleaseEvent() 
 	{
 		cur_point = pts.end();
 	}
 
-	void mouseMoveEvent(QMouseEvent* event) override
+	void mouseMoveEvent(const nana::point& pos) 
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
+		const BLPoint pt(pos.x, pos.y);
 		if (cur_point != pts.end())
 		{
 			*cur_point = pt;
@@ -263,13 +302,6 @@ private:
 			updateCanvas();
 		}
 	}
-
-	void showEvent(QShowEvent* event) override
-	{
-		updateCoeff();
-		QWidget::showEvent(event);
-	}
-
 
 	void onRenderB2D(BLContext& ctx)
 	{
@@ -300,7 +332,7 @@ private:
 				std::list<complex_double> vector_list;
 
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
-					[&big_path, &small_path, &lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
+					[&lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
 				{
 
 					if (lines.empty())
@@ -372,10 +404,10 @@ private:
 
 private:
 	BLImage blImage;
-	QImage substr;
-	QList<BLPoint> pts = pi_symbol;
+	nana::paint::pixel_buffer substr;
+	std::deque<BLPoint> pts = pi_symbol;
 	fourier f;
-	QList<BLPoint>::iterator cur_point = pts.end();
+	std::deque<BLPoint>::iterator cur_point = pts.end();
 	std::vector<BLPoint> interp;
 	std::vector<std::pair<complex_double, complex_double>> radii;
 	bool is_close = true;
@@ -385,80 +417,82 @@ private:
 	bool show_normal{};
 	BLContextCreateInfo createInfo{};
 	double pos{};
+	nana::drawing drawer;
+	nana::form &parent_form;
 };
 
 int main(int argc, char* argv[])
 {
-	std::vector<int>a;
-	QApplication app(argc, argv);
-	QWidget win;
+	using namespace nana;
+	form fm;
+	CanvasPanel canvas(fm);
+	panel<true> tool_widget(fm);
+	place tool_place(tool_widget);
+	tool_place.div("tool_place vert gap=2 margin=2 arrange=[20, repeated]");
+	button clear(tool_widget, "Clear");
+	clear.events().click([&canvas](const arg_click&) {canvas.clear();});
+	button pi(tool_widget, "Pi");
+	pi.events().click([&canvas](const arg_click&) {canvas.setPi();});
 
-	auto* h = new QHBoxLayout;
-	auto* l = new QVBoxLayout;
-	h->setContentsMargins(1, 1, 1, 1);
-	l->setContentsMargins(1, 1, 1, 1);
-	auto* clear = new QPushButton("Clear");
-	auto* pi = new QPushButton("Pi");
-	auto* is_closed = new QCheckBox("Closed");
-	is_closed->setChecked(true);
-	auto* show_circles = new QCheckBox("Circles");
-	auto* show_broken_line = new QCheckBox("Zigzag lines");
-	auto* show_tangent = new QCheckBox("Tangent");
-	auto* show_normal = new QCheckBox("Normal");
+	checkbox is_closed(tool_widget, "Closed");
+	is_closed.check(true);
+	is_closed.events().checked([&canvas](const arg_checkbox &ac ) {canvas.setIsClose(ac.widget->checked());});
 
-	auto* anima = new QCheckBox("Animation");
-	auto* positin = new QDial();
-	positin->setWrapping(true);
-	auto* canvas = new QCanvasWidget;
+	checkbox show_circles(tool_widget, "Circles");
+	show_circles.events().checked([&canvas](const arg_checkbox& ac) {canvas.setShowCircles(ac.widget->checked());});
 
-	QTimer timer;
-	QObject::connect(&timer, &QTimer::timeout, [positin]
+	checkbox show_broken_line(tool_widget, "Zigzag lines");
+	show_broken_line.events().checked([&canvas](const arg_checkbox& ac) {canvas.setShowBrokenLine(ac.widget->checked()); });
+	
+	checkbox show_tangent(tool_widget, "Tangent");
+	show_tangent.events().checked([&canvas](const arg_checkbox& ac) {canvas.setShowTangent(ac.widget->checked()); });
+
+	checkbox show_normal(tool_widget, "Normal");
+	show_normal.events().checked([&canvas](const arg_checkbox& ac) {canvas.setShowNormal(ac.widget->checked()); });
+
+	nana::timer timer {std::chrono::milliseconds{50}};
+
+	slider positin(tool_widget);
+	positin.maximum(360);
+	positin.events().value_changed([&positin, &canvas](const arg_slider& sl)
 		{
-			positin->setValue(positin->value() + 1);
-		}
-	);
-	timer.setInterval(100);
+			canvas.setPos(2 * fourtd::pi * sl.widget.value() / sl.widget.maximum()); 
+		});
 
-	l->addWidget(pi);
-	l->addWidget(clear);
-	l->addWidget(is_closed);
-	l->addWidget(show_circles);
-	l->addWidget(show_broken_line);
-	l->addWidget(show_tangent);
-	l->addWidget(show_normal);
-	l->addWidget(anima);
-	l->addWidget(positin);
-	l->addStretch();
-	h->addLayout(l);
-	h->addWidget(canvas, 1);
-	positin->setMaximum(100);
-
-	QObject::connect(pi, &QPushButton::pressed, canvas, &QCanvasWidget::setPi);
-	QObject::connect(clear, &QPushButton::pressed, canvas, &QCanvasWidget::clear);
-	QObject::connect(is_closed, &QCheckBox::toggled, canvas, &QCanvasWidget::setIsClose);
-	QObject::connect(show_circles, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowCircles);
-	QObject::connect(show_broken_line, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowBrokenLine);
-	QObject::connect(show_tangent, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowTangent);
-	QObject::connect(show_normal, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowNormal);
-
-	QObject::connect(anima, &QCheckBox::toggled, [&timer](bool value)
+	timer.elapse([&positin, &canvas]
 		{
-			if (value)
+			positin.value((positin.value() + 1) % 360);
+			canvas.setPos(2 * fourtd::pi * positin.value() / positin.maximum());
+
+		});
+
+	checkbox anima(tool_widget, "Animation");
+	anima.events().checked([&canvas, &timer](const arg_checkbox& ac)
+		{
+			if (ac.widget->checked())
 				timer.start();
 			else
 				timer.stop();
-		}
-	);
+		});
+	
 
-	QObject::connect(positin, &QDial::valueChanged, [canvas, positin](int value)
-		{
-			canvas->setPos(2 * fourtd::pi * value / positin->maximum());
-		}
-	);
-
-	win.setLayout(h);
-
-	win.resize(QSize(800, 600));
-	win.show();
-	return app.exec();
+	tool_place.field("tool_place")
+		<< clear
+		<< pi
+		<< is_closed
+		<< show_circles
+		<< show_broken_line
+		<< show_tangent
+		<< show_normal
+		<< anima
+		<< positin;
+	
+	place main_place(fm);
+	main_place.div("<main_place arrange=[20%,variable]>");
+	main_place.field("main_place") << tool_widget << canvas;
+	main_place.collocate();
+	fm.size({ 800, 600 });
+	fm.show();
+	exec();
+	return 0;
 }
