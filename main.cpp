@@ -389,7 +389,6 @@ private:
 
 int main(int argc, char* argv[])
 {
-	std::vector<int>a;
 	QApplication app(argc, argv);
 	QWidget win;
 
