@@ -79,7 +79,7 @@ public:
 	void setPi()
 	{
 		pts = pi_symbol;
-		cur_point = pts.begin();
+		cur_point = pts.end();
 		updateCoeff();
 		updateCanvas();
 	}
