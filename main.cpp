@@ -1,20 +1,18 @@
 #include <stdlib.h>
 #include <QtGui>
 #include <QtWidgets>
-#include <blend2d.h>
-
 #include "trinterp.hpp"
 
 using namespace std::complex_literals;
 
 namespace fourtd
 {
-	template<> inline complex_double fourier::make_complex<const BLPoint&> [[nodiscard]] (const BLPoint& c)
+	template<> inline complex_double fourier::make_complex<const QPointF&> [[nodiscard]] (const QPointF& c)
 	{
-		return { c.x,c.y };
+		return { c.x(), c.y() };
 	}
 
-	template<> inline BLPoint fourier::make_value<BLPoint> [[nodiscard]] (const complex_double& z)
+	template<> inline QPointF fourier::make_value<QPointF> [[nodiscard]] (const complex_double& z)
 	{
 		return { z.real(), z.imag() };
 	}
@@ -24,7 +22,7 @@ using namespace fourtd;
 
 namespace
 {
-	inline const QList<BLPoint> pi_symbol =
+	inline const QList<QPointF> pi_symbol =
 	{
 		{408.0,130.0}
 		,{503.0,132.0}
@@ -64,8 +62,6 @@ public:
 	QCanvasWidget() :
 		f(pts.cbegin(), pts.cend())
 	{
-
-		createInfo.threadCount = std::thread::hardware_concurrency();
 	}
 
 	void clear()
@@ -123,33 +119,17 @@ public:
 	}
 
 private:
-	void renderCanvas()
-	{
-		BLContext ctx(blImage, createInfo);
-		onRenderB2D(ctx);
-		ctx.end();
-	}
 
 	void updateCanvas(bool force = false)
 	{
-		if (force)
-			renderCanvas();
-		else
-			dirty = true;
 		repaint();
 	}
 
 	void resizeCanvas()
 	{
-		const auto sz = size();
-		if (substr.size() == sz)
-			return;
-		substr = QImage(sz, QImage::Format_ARGB32_Premultiplied);
-		blImage.createFromData(substr.width(), substr.height(), BL_FORMAT_PRGB32, substr.bits(), substr.bytesPerLine());
 		updateCanvas(false);
 	}
 
-	bool dirty = {};
 
 	void resizeEvent(QResizeEvent*) override
 	{
@@ -196,25 +176,23 @@ private:
 	void paintEvent(QPaintEvent*) override
 	{
 		QPainter painter(this);
-		if (dirty)
-			renderCanvas();
-		painter.drawImage(QPoint{ 0, 0 }, substr);
+		onRenderB2D(painter);
 	}
 
-	auto find_point(const BLPoint& test_pt)
+	auto find_point(const QPointF& test_pt)
 	{
-		return std::find_if(std::execution::par_unseq, pts.begin(), pts.end(),
+        return std::find_if(pts.begin(), pts.end(),
 			[&test_pt](auto& pt)
 			{
 				const auto d = pt - test_pt;
-				return (d.x * d.x + d.y * d.y) < sel_tolerance;
+				return (d.x() * d.x() + d.y() * d.y()) < sel_tolerance;
 			}
 		);
 	}
 
 	void mouseDoubleClickEvent(QMouseEvent* event) override
 	{
-		const auto test = find_point(BLPoint(event->pos().x(), event->pos().y()));
+		const auto test = find_point(event->pos());
 
 		if (test != pts.end())
 		{
@@ -227,20 +205,19 @@ private:
 
 	void mousePressEvent(QMouseEvent* event) override
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
-		cur_point = find_point(pt);
+		cur_point = find_point(event->pos());
 		if (cur_point == pts.end())
 		{
-			const auto inter = f.lengthToPoint({ pt.x,pt.y });
+			const auto inter = f.lengthToPoint(complex_double(event->pos().x(), event->pos().y()));
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
-				pts.insert(index, pt);
+				pts.insert(index, event->pos());
 				cur_point = std::next(pts.begin(), index);
 			}
 			else
 			{
-				pts.push_back(pt);
+				pts.push_back(event->pos());
 				cur_point = std::prev(pts.end());
 			}
 		}
@@ -255,10 +232,9 @@ private:
 
 	void mouseMoveEvent(QMouseEvent* event) override
 	{
-		const BLPoint pt(event->pos().x(), event->pos().y());
 		if (cur_point != pts.end())
 		{
-			*cur_point = pt;
+			*cur_point = event->pos();
 			updateCoeff();
 			updateCanvas();
 		}
@@ -271,30 +247,31 @@ private:
 	}
 
 
-	void onRenderB2D(BLContext& ctx)
+	void onRenderB2D(QPainter& ctx)
 	{
-
-		ctx.setFillStyle(BLRgba32(0xFF000000u));
-		ctx.fillAll();
+		ctx.setRenderHint(QPainter::Antialiasing);
+		ctx.fillRect(rect(),Qt::black);
+		QPen pen;
 
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
-				f.values<BLPoint>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
+				f.values<QPointF>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
 
-			ctx.setStrokeStyle(BLRgba32(0xFFFFFF00u));
+			pen.setColor(QColor(0xFFFFFF00u));
+			pen.setWidth(4);
+			ctx.setPen(pen);
 
-			ctx.setStrokeWidth(4);
 			if (is_close)
-				ctx.strokePolygon(&interp[0], interp.size());
+				ctx.drawPolygon(&interp[0], interp.size());
 			else
-				ctx.strokePolyline(&interp[0], interp.size());
+				ctx.drawPolyline(&interp[0], interp.size());
 
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
-				std::vector<BLPoint> lines;
-				BLPath big_path;
-				BLPath small_path;
+				std::vector<QPointF> lines;
+				QPainterPath big_path;
+				QPainterPath small_path;
 				complex_double der;
 
 				std::list<complex_double> vector_list;
@@ -320,70 +297,67 @@ private:
 				);
 
 				complex_double sum= f.firstCoeff();
+				
 				for (const auto &vec : vector_list)
 				{
-					big_path.addCircle(BLCircle(sum.real(), sum.imag(), std::abs(vec)));
+					const auto rad = std::abs(vec);
+					big_path.addEllipse(sum.real() - rad, sum.imag() - rad, 2*rad, 2*rad);
 					sum += vec;
 					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addCircle(BLCircle(sum.real(), sum.imag(), 2));
+					small_path.addEllipse(sum.real() - 2, sum.imag() - 2, 4 , 4);
 				}
 
 				if (show_circles)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0xF000B3B3u));
-					ctx.strokePath(big_path);
+					pen.setWidth(2);
+					pen.setColor(QColor(0xF000B3B3u));
+					ctx.strokePath(big_path, pen);
 				}
-
-				ctx.setStrokeWidth(1);
 
 				if (show_broken_line)
 				{
-					ctx.setStrokeWidth(2);
-					ctx.setStrokeStyle(BLRgba32(0xFFFFFFFFu));
-					ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-					ctx.strokePolyline(&lines[0], lines.size());
-					ctx.fillPath(small_path);
+					pen.setWidth(2);
+					pen.setColor(Qt::white);
+					ctx.setPen(pen);
+					ctx.drawPolyline(&lines[0], lines.size());
+					ctx.fillPath(small_path,QBrush(Qt::white));
 				}
 
-				ctx.setStrokeWidth(1);
-				ctx.setStrokeStyle(BLRgba32(0xFFFF0000u));
+				pen.setWidth(1);
+				pen.setColor(Qt::red);
+				ctx.setPen(pen);
 
 				if (show_tangent)
-					ctx.strokeLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
+					ctx.drawLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
 
 				if (show_normal)
-					ctx.strokeLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
-				ctx.setStrokeWidth(3);
-				ctx.strokeCircle(lines.back().x, lines.back().y, 4);
+					ctx.drawLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
+				
+				pen.setWidth(3);
+				ctx.setPen(pen);
+				ctx.drawEllipse(lines.back().x() - 4, lines.back().y() -  4, 8, 8); 
 			}
 		}
-
-		BLPath path;
-
+		ctx.setPen(Qt::PenStyle::NoPen);
+		ctx.setBrush(QBrush(Qt::white));
 		for (const auto& pt : pts)
 		{
-			path.addCircle(BLCircle(pt.x, pt.y, 3));
+			ctx.drawEllipse(pt.x() - 3 , pt.y() - 3, 6 , 6);
 		}
-		ctx.setFillStyle(BLRgba32(0xFFFFFFFFu));
-		ctx.fillPath(path);
 	}
 
 
 private:
-	BLImage blImage;
-	QImage substr;
-	QList<BLPoint> pts = pi_symbol;
+	QList<QPointF> pts = pi_symbol;
 	fourier f;
-	QList<BLPoint>::iterator cur_point = pts.end();
-	std::vector<BLPoint> interp;
+	QList<QPointF>::iterator cur_point = pts.end();
+	std::vector<QPointF> interp;
 	std::vector<std::pair<complex_double, complex_double>> radii;
 	bool is_close = true;
 	bool show_circles{};
 	bool show_broken_line{};
 	bool show_tangent{};
 	bool show_normal{};
-	BLContextCreateInfo createInfo{};
 	double pos{};
 };
 

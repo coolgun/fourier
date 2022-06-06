@@ -121,7 +121,7 @@ namespace fourtd
 			for (size_t i = 0; i < size; ++i)
 				ranges.emplace_back(0.0, std::numeric_limits<double>::max(), i * delta, (i + 1) * delta);
 
-			std::for_each(std::execution::par_unseq, ranges.begin(), ranges.end(),
+            std::for_each(ranges.begin(), ranges.end(),
 				[this, &test_pt](auto &el)
 				{
 					static const double eps = 0.001;
@@ -152,7 +152,7 @@ namespace fourtd
 				}
 			);
 
-			const auto min_el = std::min_element(std::execution::par_unseq, ranges.cbegin(), ranges.cend());
+            const auto min_el = std::min_element(ranges.cbegin(), ranges.cend());
 			const auto t = std::get<1>(*min_el);
 			const auto val = nativ_value(t);
 			return { t,val,std::abs(val - test_pt) };
@@ -266,8 +266,8 @@ namespace fourtd
 
 			bool is_plus = true;
 
-			const auto _UBFirst = std::_Get_unwrapped(_First);
-			const auto _ULast = std::_Get_unwrapped(_Last);
+            const auto _UBFirst = _First;
+            const auto _ULast = _Last;
 			for (auto _UFirst = _UBFirst; _UFirst != _ULast; ++_UFirst)
 			{
 				const auto z = make_complex(*_UFirst);
@@ -289,7 +289,7 @@ namespace fourtd
 				ab.emplace_back(*it, complex_double{});
 			}
 
-			std::for_each(std::execution::par, ab.begin(), ab.end(),
+            std::for_each(ab.begin(), ab.end(),
 				[this, del, _UBFirst, _ULast](auto& el)
 				{
 					complex_double a, b;
