@@ -1,18 +1,22 @@
-#include <stdlib.h>
-#include <QtGui>
-#include <QtWidgets>
+#include <deque>
+#include <list>
+#include <CtrlLib/CtrlLib.h>
 #include "trinterp.hpp"
 
 using namespace std::complex_literals;
+using namespace Upp;
+
+#define LAYOUTFILE <fourier/main.lay>
+#include <CtrlCore/lay.h>
 
 namespace fourtd
 {
-	template<> inline complex_double fourier::make_complex<const QPointF&> [[nodiscard]] (const QPointF& c)
+	template<> inline complex_double fourier::make_complex<const Pointf&> [[nodiscard]] (const Pointf& c)
 	{
-		return { c.x(), c.y() };
+		return { c.x, c.y };
 	}
 
-	template<> inline QPointF fourier::make_value<QPointF> [[nodiscard]] (const complex_double& z)
+	template<> Pointf fourier::make_value<Pointf> [[nodiscard]] (const complex_double& z)
 	{
 		return { z.real(), z.imag() };
 	}
@@ -22,7 +26,7 @@ using namespace fourtd;
 
 namespace
 {
-	inline const QList<QPointF> pi_symbol =
+	inline const std::deque<Pointf> pi_symbol =
 	{
 		{408.0,130.0}
 		,{503.0,132.0}
@@ -52,16 +56,17 @@ namespace
 		,{188.0,131.0}
 		,{243.0,131.0}
 	};
-	constexpr double sel_tolerance = 7.0 * 7.0;
+	constexpr double sel_tolerance = 7.0;
 }
 
-class QCanvasWidget : public QWidget
+class CanvasWidget :public Ctrl 
 {
 public:
 
-	QCanvasWidget() :
+	CanvasWidget() :
 		f(pts.cbegin(), pts.cend())
 	{
+		
 	}
 
 	void clear()
@@ -117,23 +122,19 @@ public:
 		is_close = value;
 		updateCanvas();
 	}
+	
+	void setParent(TopWindow *par)
+	{
+		parent = par;
+		updateCoeff();
+	}
 
 private:
 
+
 	void updateCanvas(bool force = false)
 	{
-		repaint();
-	}
-
-	void resizeCanvas()
-	{
-		updateCanvas(false);
-	}
-
-
-	void resizeEvent(QResizeEvent*) override
-	{
-		resizeCanvas();
+		Refresh();
 	}
 
 	void updateCoeff()
@@ -162,37 +163,41 @@ private:
 				return rad;
 			}
 		);
-
-		if (parentWidget())
+		
+		if (parent)
 		{
-			auto square = std::async(std::launch::async, [this] { return f.square(); });
+			auto square = std::async(std::launch::async, [this] { return f.square();});
 			auto length = std::async(std::launch::async, [this] { return f.length(0, 2 * fourtd::pi); });
-			parentWidget()->setWindowTitle(QString("fourier - S=%1 , Len=%2").arg(square.get()).arg(length.get()));
+			parent->Title(String("fourier - S = ") 
+				+ FormatDouble(square.get())
+				+ String(" , Len = ") 
+				+ FormatDouble(length.get()));
 		}
-
 		radii = std::move(rad_future.get());
 	}
 
-	void paintEvent(QPaintEvent*) override
+	void Paint(Draw& w) override
 	{
-		QPainter painter(this);
-		onRenderB2D(painter);
+		ImageBuffer substr(GetSize());		
+		BufferPainter sw(substr);
+		sw.Clear(Black());
+		onRenderB2D(sw);
+		w.DrawImage(0, 0, substr);
 	}
 
-	auto find_point(const QPointF& test_pt)
+	auto find_point(const Pointf& test_pt)
 	{
         return std::find_if(pts.begin(), pts.end(),
 			[&test_pt](auto& pt)
 			{
-				const auto d = pt - test_pt;
-				return (d.x() * d.x() + d.y() * d.y()) < sel_tolerance;
+				return Length(pt - test_pt) < sel_tolerance;
 			}
 		);
 	}
-
-	void mouseDoubleClickEvent(QMouseEvent* event) override
+    
+	void  LeftDouble(Point pos, dword keyflags) override
 	{
-		const auto test = find_point(event->pos());
+		const auto test = find_point(pos);
 
 		if (test != pts.end())
 		{
@@ -203,21 +208,21 @@ private:
 		}
 	}
 
-	void mousePressEvent(QMouseEvent* event) override
+	void LeftDown(Point pos, dword flags) override
 	{
-		cur_point = find_point(event->pos());
+		cur_point = find_point(pos);
 		if (cur_point == pts.end())
 		{
-			const auto inter = f.lengthToPoint(complex_double(event->pos().x(), event->pos().y()));
+			const auto inter = f.lengthToPoint(complex_double(pos.x, pos.y));
 			if (std::get<2>(inter) < 5)
 			{
 				const auto index = static_cast<int>(std::ceil(f.angleToIndex(std::get<0>(inter))));
-				pts.insert(index, event->pos());
+				pts.insert(pts.begin() + index, pos);
 				cur_point = std::next(pts.begin(), index);
 			}
 			else
 			{
-				pts.push_back(event->pos());
+				pts.push_back(pos);
 				cur_point = std::prev(pts.end());
 			}
 		}
@@ -225,133 +230,152 @@ private:
 		updateCanvas();
 	}
 
-	void mouseReleaseEvent(QMouseEvent*) override
+	void LeftUp(Point pos, dword flags) override
 	{
 		cur_point = pts.end();
 	}
 
-	void mouseMoveEvent(QMouseEvent* event) override
+	void MouseMove(Point pos, dword flags) override
 	{
 		if (cur_point != pts.end())
 		{
-			*cur_point = event->pos();
+			*cur_point = pos;
 			updateCoeff();
 			updateCanvas();
 		}
 	}
-
-	void showEvent(QShowEvent* event) override
+	
+	void DrawPoly(Painter &ctx, const std::vector<Pointf> & points, bool close, int width, const Color &color , bool is_marker  = false)
 	{
-		updateCoeff();
-		QWidget::showEvent(event);
+		if(points.size() <2 ) return;
+		bool first = true;
+		std::vector<double> length;
+		double full_length{};
+		Pointf prev{};
+		for(const auto &pt: points)
+		{
+			if(first)
+			{
+				first = false;
+				ctx.Move(pt);
+				prev = pt;
+				continue;
+			}
+			ctx.Line(pt);
+			if(is_marker)
+			{
+				full_length += Length(pt - prev); 
+				length.push_back(full_length);
+				prev = pt;
+			}
+		}
+		if(close)
+			ctx.Close();
+		
+		ctx.Stroke(width, color);
+		if(is_marker)
+		{
+			for(const auto len: length)
+			{
+				ctx.BeginOnPath((len - 0.1) / full_length );
+				ctx.Move(-8, -3).Line(0, 0).Line(-8, 3).Close().Fill(White());
+				ctx.End();
+			}
+		}
+				
 	}
 
-
-	void onRenderB2D(QPainter& ctx)
+	void onRenderB2D(Painter &ctx)
 	{
-		ctx.setRenderHint(QPainter::Antialiasing);
-		ctx.fillRect(rect(),Qt::black);
-		QPen pen;
-
 		if (pts.size() > 1)
 		{
 			if (interp.empty())
-				f.values<QPointF>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
+				f.values<Pointf>(std::back_inserter(interp), 0, pts.size() -1.0 + static_cast<int>(is_close), 0.01);
 
-			pen.setColor(QColor(0xFFFFFF00u));
-			pen.setWidth(4);
-			ctx.setPen(pen);
-
-			if (is_close)
-				ctx.drawPolygon(&interp[0], interp.size());
-			else
-				ctx.drawPolyline(&interp[0], interp.size());
-
+			DrawPoly(ctx, interp, is_close, 4, SYellow);
+		
 			if (show_circles || show_tangent || show_normal || show_broken_line)
 			{
-				std::vector<QPointF> lines;
-				QPainterPath big_path;
-				QPainterPath small_path;
+				std::vector<Pointf> lines;
 				complex_double der;
 
 				std::list<complex_double> vector_list;
-
+				
 				const auto cur_pt = f.nativ_value(f.indexToAngle(pos),
-					[&big_path, &small_path, &lines, &der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
+					[&der, &vector_list, r_it = radii.cbegin()](const auto& gsum, const auto& coeff, const complex_double& sincos, size_t k)mutable
 				{
-
-					if (lines.empty())
-						lines.emplace_back(gsum.real(), gsum.imag());
-
-					auto sum = gsum;
 
 					const auto z1 = r_it->first * sincos;
 					const auto z2 = r_it->second * std::conj(sincos);
-
 					vector_list.push_front(z2);
 					vector_list.push_back(z1);
-
 					der = fourier::derivative_step(der, coeff, sincos, k);
 					++r_it;
 				}
 				);
 
 				complex_double sum= f.firstCoeff();
-				
+				lines.emplace_back(sum.real(), sum.imag());
 				for (const auto &vec : vector_list)
 				{
-					const auto rad = std::abs(vec);
-					big_path.addEllipse(sum.real() - rad, sum.imag() - rad, 2*rad, 2*rad);
+					if(show_circles)
+					{
+						ctx.Circle(sum.real(), sum.imag(), std::abs(vec));
+					}
 					sum += vec;
 					lines.emplace_back(sum.real(), sum.imag());
-					small_path.addEllipse(sum.real() - 2, sum.imag() - 2, 4 , 4);
 				}
-
+		
 				if (show_circles)
 				{
-					pen.setWidth(2);
-					pen.setColor(QColor(0xF000B3B3u));
-					ctx.strokePath(big_path, pen);
+					ctx.Opacity(0.5).Stroke(2,Color(0,0xB3u,0xB3u));
 				}
 
 				if (show_broken_line)
 				{
-					pen.setWidth(2);
-					pen.setColor(Qt::white);
-					ctx.setPen(pen);
-					ctx.drawPolyline(&lines[0], lines.size());
-					ctx.fillPath(small_path,QBrush(Qt::white));
+					DrawPoly(ctx, lines, false, 2, SWhite, true);
 				}
 
-				pen.setWidth(1);
-				pen.setColor(Qt::red);
-				ctx.setPen(pen);
-
 				if (show_tangent)
-					ctx.drawLine(cur_pt.real() - der.real(),cur_pt.imag() - der.imag(),cur_pt.real() + der.real(),cur_pt.imag() + der.imag());
+					ctx.DrawLine
+					(
+						cur_pt.real() - der.real(),
+						cur_pt.imag() - der.imag(),
+						cur_pt.real() + der.real(),
+						cur_pt.imag() + der.imag(),
+						1,
+						SRed
+					);
 
 				if (show_normal)
-					ctx.drawLine(cur_pt.real() - der.imag(),cur_pt.imag() + der.real(), cur_pt.real() + der.imag(),cur_pt.imag() - der.real());
+					ctx.DrawLine
+					(
+						cur_pt.real() - der.imag(),
+						cur_pt.imag() + der.real(),
+						cur_pt.real() + der.imag(),
+						cur_pt.imag() - der.real(),
+						1,
+						SRed
+						);
 				
-				pen.setWidth(3);
-				ctx.setPen(pen);
-				ctx.drawEllipse(lines.back().x() - 4, lines.back().y() -  4, 8, 8); 
+				ctx.DrawEllipse(lines.back().x - 4, lines.back().y - 4, 8, 8, Null, 3, SRed); 
 			}
 		}
-		ctx.setPen(Qt::PenStyle::NoPen);
-		ctx.setBrush(QBrush(Qt::white));
+		
 		for (const auto& pt : pts)
 		{
-			ctx.drawEllipse(pt.x() - 3 , pt.y() - 3, 6 , 6);
+			ctx.DrawEllipse(pt.x - 4 , pt.y - 4, 8 , 8, SWhite);
 		}
 	}
 
 
 private:
-	QList<QPointF> pts = pi_symbol;
+	TopWindow *parent{};
+	bool dirty = {};
+	std::deque<Pointf> pts = pi_symbol;
 	fourier f;
-	QList<QPointF>::iterator cur_point = pts.end();
-	std::vector<QPointF> interp;
+	std::deque<Pointf>::iterator cur_point = pts.end();
+	std::vector<Pointf> interp;
 	std::vector<std::pair<complex_double, complex_double>> radii;
 	bool is_close = true;
 	bool show_circles{};
@@ -361,77 +385,59 @@ private:
 	double pos{};
 };
 
-int main(int argc, char* argv[])
+class FourierView : public TopWindow
 {
-	QApplication app(argc, argv);
-	QWidget win;
 
-	auto* h = new QHBoxLayout;
-	auto* l = new QVBoxLayout;
-	h->setContentsMargins(1, 1, 1, 1);
-	l->setContentsMargins(1, 1, 1, 1);
-	auto* clear = new QPushButton("Clear");
-	auto* pi = new QPushButton("Pi");
-	auto* is_closed = new QCheckBox("Closed");
-	is_closed->setChecked(true);
-	auto* show_circles = new QCheckBox("Circles");
-	auto* show_broken_line = new QCheckBox("Zigzag lines");
-	auto* show_tangent = new QCheckBox("Tangent");
-	auto* show_normal = new QCheckBox("Normal");
+public:
+	FourierView();
 
-	auto* anima = new QCheckBox("Animation");
-	auto* positin = new QDial();
-	positin->setWrapping(true);
-	auto* canvas = new QCanvasWidget;
+private:
+	CanvasWidget canvas;
+	Splitter splitter;
+	FrameBottom<WithCtrlLayout<StaticRect>> ctrl;
+};
 
-	QTimer timer;
-	QObject::connect(&timer, &QTimer::timeout, [positin]
+FourierView::FourierView()
+{
+	canvas.setParent(this);
+	splitter.Horz(ctrl, canvas);
+	splitter.SetPos(270);
+	Add(splitter.SizePos());
+	CtrlLayout(ctrl);
+	ctrl.bClear.WhenPush = [this]{canvas.clear();};
+	ctrl.bPi.WhenPush = [this]{canvas.setPi();};
+	ctrl.cbClosed = true;
+	ctrl.cbClosed.WhenAction = [this](){canvas.setIsClose(ctrl.cbClosed);};
+	ctrl.cbCircles.WhenAction = [this](){canvas.setShowCircles(ctrl.cbCircles);};
+	ctrl.cbLines.WhenAction = [this](){canvas.setShowBrokenLine(ctrl.cbLines);};
+	ctrl.cbTangent.WhenAction = [this](){canvas.setShowTangent(ctrl.cbTangent);};
+	ctrl.cbNormal.WhenAction = [this](){canvas.setShowNormal(ctrl.cbNormal);};
+	ctrl.scAngle.Range(360);
+	ctrl.scAngle.WhenAction = [this]()
+	{
+		canvas.setPos(fourtd::pi * static_cast<int>(ctrl.scAngle.GetData()) / 180.0);
+	};
+	
+	ctrl.cbAnim.WhenAction = [this]()
+	{
+		KillTimeCallback(1);
+		SetTimeCallback(-100, [this]()
 		{
-			positin->setValue(positin->value() + 1);
+			ctrl.scAngle.SetData(
+			(static_cast<int>(ctrl.scAngle.GetData()) + 1) % ctrl.scAngle.GetMax());
+			ctrl.scAngle.WhenAction();
 		}
-	);
-	timer.setInterval(100);
+		);
+	};
 
-	l->addWidget(pi);
-	l->addWidget(clear);
-	l->addWidget(is_closed);
-	l->addWidget(show_circles);
-	l->addWidget(show_broken_line);
-	l->addWidget(show_tangent);
-	l->addWidget(show_normal);
-	l->addWidget(anima);
-	l->addWidget(positin);
-	l->addStretch();
-	h->addLayout(l);
-	h->addWidget(canvas, 1);
-	positin->setMaximum(100);
+	Sizeable().Zoomable();
 
-	QObject::connect(pi, &QPushButton::pressed, canvas, &QCanvasWidget::setPi);
-	QObject::connect(clear, &QPushButton::pressed, canvas, &QCanvasWidget::clear);
-	QObject::connect(is_closed, &QCheckBox::toggled, canvas, &QCanvasWidget::setIsClose);
-	QObject::connect(show_circles, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowCircles);
-	QObject::connect(show_broken_line, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowBrokenLine);
-	QObject::connect(show_tangent, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowTangent);
-	QObject::connect(show_normal, &QCheckBox::toggled, canvas, &QCanvasWidget::setShowNormal);
+}
 
-	QObject::connect(anima, &QCheckBox::toggled, [&timer](bool value)
-		{
-			if (value)
-				timer.start();
-			else
-				timer.stop();
-		}
-	);
-
-	QObject::connect(positin, &QDial::valueChanged, [canvas, positin](int value)
-		{
-			canvas->setPos(2 * fourtd::pi * value / positin->maximum());
-		}
-	);
-
-	win.setLayout(h);
-
-	win.resize(QSize(800, 600));
-	win.show();
-	return app.exec();
+GUI_APP_MAIN
+{
+	FourierView x;
+	LoadFromFile(x);
+	x.Run();
+	StoreToFile(x);
 }

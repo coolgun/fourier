@@ -5,6 +5,7 @@
 #include <complex>
 #include <algorithm>
 #include <future>
+#include <numeric>
 
 namespace fourtd
 {

@@ -1,0 +1,12 @@
+LAYOUT(CtrlLayout, 152, 340)
+	ITEM(Upp::Button, bClear, SetLabel(t_("Clear")).HSizePosZ(0, 44).TopPosZ(0, 15))
+	ITEM(Upp::Button, bPi, SetLabel(t_("Pi")).HSizePosZ(0, 44).TopPosZ(16, 15))
+	ITEM(Upp::Option, cbClosed, SetLabel(t_("Closed")).LeftPosZ(0, 108).TopPosZ(32, 16))
+	ITEM(Upp::Option, cbCircles, SetLabel(t_("Circles")).LeftPosZ(0, 108).TopPosZ(52, 16))
+	ITEM(Upp::Option, cbLines, SetLabel(t_("Zigzag lines")).LeftPosZ(0, 108).TopPosZ(72, 16))
+	ITEM(Upp::Option, cbTangent, SetLabel(t_("Tangent")).LeftPosZ(0, 108).TopPosZ(92, 16))
+	ITEM(Upp::Option, cbNormal, SetLabel(t_("Normal")).LeftPosZ(0, 108).TopPosZ(112, 16))
+	ITEM(Upp::Option, cbAnim, SetLabel(t_("Animation")).LeftPosZ(0, 108).TopPosZ(132, 16))
+	ITEM(Upp::SliderCtrl, scAngle, LeftPosZ(4, 180).TopPosZ(152, 24))
+END_LAYOUT
+

@@ -1,0 +1,10 @@
+uses
+	CtrlLib;
+
+file
+	main.cpp,
+	main.lay;
+
+mainconfig
+	"" = "GUI";
+
